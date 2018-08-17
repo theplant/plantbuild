@@ -1,0 +1,7 @@
+version: "3"
+services:
+  jsonnet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: registry.theplant-dev.com/theplant/jsonnet:latest
