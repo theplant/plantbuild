@@ -1,3 +1,3 @@
 local dc = import 'dc.jsonnet';
 
-dc.go_build_dep_image("theplant/example", "1.0.0")
+dc.go_build_dep_image("theplant/example")

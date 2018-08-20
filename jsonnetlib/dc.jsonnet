@@ -1,6 +1,11 @@
 {
     local root = self,
-    go_test(pkg, version, modules, deps):: {
+    local v = std.extVar("VERSION"),
+    local version = if std.length(v) == 0 then
+                        error "version is empty"
+                    else v,
+
+    go_test(pkg, modules, deps):: {
         local projectRoot = "/go/src/github.com/%s" % pkg,
         local image = "registry.theplant-dev.com/%s_dep:%s" % [pkg, version],
 
@@ -20,7 +25,7 @@
         },
     },
 
-    go_build_dep_image(pkg, version):: {
+    go_build_dep_image(pkg):: {
         "version": "3",
         "services": {
             "dep_image": {
@@ -37,7 +42,7 @@
         }
     },
 
-    build_app_image(pkg, version, modules):: {
+    build_app_image(pkg, modules):: {
         "version": "3",
         "services": {
             ["build_image_%s" % m]: {
