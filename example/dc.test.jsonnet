@@ -5,4 +5,4 @@ local modules = [
 
 local dc = import 'dc.jsonnet';
 
-dc.test("theplant/example", "1.0.0", modules, ["postgres", "elasticsearch", "nats", "redis"])
+dc.go_test("theplant/example", "1.0.0", modules, ["postgres", "elasticsearch", "nats", "redis"])

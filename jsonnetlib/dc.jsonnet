@@ -1,6 +1,6 @@
 {
     local root = self,
-    test(pkg, version, modules, deps):: {
+    go_test(pkg, version, modules, deps):: {
         local projectRoot = "/go/src/github.com/%s" % pkg,
         local image = "registry.theplant-dev.com/%s_dep:%s" % [pkg, version],
 
@@ -20,7 +20,7 @@
         },
     },
 
-    godep(pkg, version):: {
+    go_build_dep_image(pkg, version):: {
         "version": "3",
         "services": {
             "dep_image": {
@@ -32,8 +32,25 @@
                     "WORKDIR=/go/src/github.com/%s" % pkg
                 ]
             },
-            "image": "registry.theplant-dev.com/%s_dep:%s" % [pkg, version]
+            "image": "registry.theplant-dev.com/%s-dep:%s" % [pkg, version]
             }
+        }
+    },
+
+    build_app_image(pkg, version, modules):: {
+        "version": "3",
+        "services": {
+            ["build_image_%s" % m]: {
+                "build": {
+                    "context": ".",
+                    "dockerfile": "./%s/Dockerfile" % m,
+                    "args": [
+                        "GITHUB_TOKEN=$GITHUB_TOKEN",
+                        "NPM_TOKEN=$NPM_TOKEN",
+                    ]
+                },
+            "image": "registry.theplant-dev.com/%s-%s:%s" % [pkg, m, version]
+            }  for m in modules
         }
     },
 
