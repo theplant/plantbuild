@@ -23,11 +23,11 @@ local modules = [
 dc.test("theplant/example", "1.0.0", modules, ["postgres", "elasticsearch", "nats", "redis"])
 
 ```
-It first import the library dc.jsonnet from theplant/jsonnet docker image,
+It first import the library dc.jsonnet from theplant/plantbuild docker image,
 And then it config the modules the projects that needs to test, and the function `dc.test` generate a valid docker-compose file for you to run those tests, You can run this to checkout the output docker-compose file content
 
 ```
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/example:/src registry.theplant-dev.com/theplant/jsonnet
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/example:/src registry.theplant-dev.com/theplant/plantbuild
 
 ```
 
@@ -38,17 +38,17 @@ Copy files in example into your project root
 To Build the dependency docker image
 
 ```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.dep.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/jsonnet | docker-compose --verbose -f - build --no-cache
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.dep.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose --verbose -f - build --no-cache
 ```
 
 To Run tests of a certain module
 
 ```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/jsonnet | docker-compose -f - run --rm inventory_test
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - run --rm inventory_test
 ```
 
 To Build app image
 
 ```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.build.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/jsonnet | docker-compose --verbose -f - build --no-cache
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.build.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose --verbose -f - build --no-cache
 ```
