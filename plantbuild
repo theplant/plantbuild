@@ -3,8 +3,13 @@
 subcommand=$1
 shift
 
+jsonnetfile=$1
+shift
+
 version=
 app=
+
+usage="Usage: plantbuild run/push ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
 while getopts "v:a:" opt; do
   case $opt in
@@ -13,27 +18,36 @@ while getopts "v:a:" opt; do
     a ) app=$OPTARG
       ;;
     \? )
-        echo "Usage: plantbuild -a=app1 -v=1.0.0"
+        echo "$usage"
         exit 1
       ;;
   esac
 done
 
-jsonnetfile="$(pwd)/plantbuild/$subcommand.jsonnet"
-# echo $jsonnetfile
-if ! [ -e $jsonnetfile ]; then
-    commands=`ls ./plantbuild/*.jsonnet 2>/dev/null | awk -v FS='/' '{print $3}'| awk -v FS='.' '{print $1}'`
-    if [ -z "$commands" ]; then
-        echo "please create ./plantbuild and put some jsonnet files there"
-        exit 1
-    fi
-    echo "command '$sub_command' not exist, use these:"
-    echo $commands
-    exit
+# jsonnetfile="$(pwd)/$jsonnetfile"
+if [ -z $jsonnetfile ]; then
+    echo "$usage"
+    exit 1
 fi
 
-if [ -z $app ]; then
-    docker run --rm -e RUN=/src/$subcommand.jsonnet -e VERSION=$version -v `pwd`/plantbuild:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - up
-else
-    docker run --rm -e RUN=/src/$subcommand.jsonnet -e VERSION=$version -v `pwd`/plantbuild:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - run --rm $app
+if ! [ -e $jsonnetfile ]; then
+    echo "$jsonnetfile not exists"
+    exit 1
 fi
+
+dir=`dirname $jsonnetfile`
+filename=`basename $jsonnetfile`
+
+case $subcommand in
+    run)
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - run "$app"_test
+        ;;
+    push)
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - build build_image_$app && \
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - push build_image_$app
+        ;;
+    * )
+        echo "$usage"
+        exit 1
+        ;;
+esac
