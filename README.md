@@ -12,11 +12,49 @@ This docker image includes:
 sudo curl -s https://raw.githubusercontent.com/theplant/plantbuild/master/plantbuild > /usr/local/bin/plantbuild && sudo chmod +x /usr/local/bin/plantbuild
 ```
 
-## Docker Compose and Kubernetes config file generate functions
+## Command Manual
+
+plantbuild -- Test, Build, Push images, and Deploy to kubernetes cluster
+
+#### Display generated configuration json content
+
+show test docker-compose file
+
+```
+plantbuild show ./example/test.jsonnet -v 1.0.0
+```
+
+show docker-compose image build file
+
+```
+plantbuild show ./example/build.jsonnet -v 1.0.0
+```
+
+show k8s deploy file
+
+```
+plantbuild show ./example/deploy.jsonnet -v 1.0.0
+```
+
+#### Run with docker-compose
+
+```
+plantbuild run ./example/test.jsonnet -v 1.0.0 -a app1
+```
+
+#### Build and push images
+
+```
+plantbuild push ./example/build.jsonnet -v 1.0.1 -a app1
+```
+
+## How to write Docker Compose and Kubernetes config file with jsonnet
 
 The source code located inside jsonnetlib/dc.jsonnet which is for generate docker-compose files, jsonnetlib/k8s.jsonnet which is for generate k8s config files.
 
-### The Testing
+You write this in your projects
+
+test.jsonnet:
 
 ```
 local dc = import 'dc.jsonnet';
@@ -26,36 +64,26 @@ local modules = [
     "inventory",
 ];
 
-dc.test("theplant/example", "1.0.0", modules, ["postgres", "elasticsearch", "nats", "redis"])
+dc.go_test("theplant/example", modules, ["postgres", "elasticsearch", "nats", "redis"])
 
 ```
+
 It first import the library dc.jsonnet from theplant/plantbuild docker image,
-And then it config the modules the projects that needs to test, and the function `dc.test` generate a valid docker-compose file for you to run those tests, You can run this to checkout the output docker-compose file content
+And then it config the modules the projects that needs to test, and the function `dc.go_test` generate a valid docker-compose file for you to run those tests, You can run this to checkout the output docker-compose file content
 
 ```
 docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/example:/src registry.theplant-dev.com/theplant/plantbuild
 
 ```
 
-## Getting Started
+Then `plantbuild` command wraps the above commands gives you a short way of invoking the command.
 
+A list of functions inside the library:
 
-Copy files in example into your project root
-
-To Build the dependency docker image
-
-```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.dep.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose --verbose -f - build --no-cache
-```
-
-To Run tests of a certain module
-
-```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.test.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - run --rm inventory_test
-```
-
-To Build app image
-
-```go
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/dc.build.jsonnet -v `pwd`/ci:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose --verbose -f - build --no-cache
-```
+- dc.go_test
+- dc.go_build_dep_image
+- dc.build_app_image
+- k8s.image2url
+- k8s.deployment
+- k8s.svc
+- k8s.ingress
