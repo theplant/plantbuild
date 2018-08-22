@@ -9,7 +9,7 @@ This docker image includes:
 ## Install plantbuild command
 
 ```
-sudo curl -s https://raw.githubusercontent.com/theplant/plantbuild/master/plantbuild > /usr/local/bin/plantbuild && sudo chmod +x /usr/local/bin/plantbuild
+sudo curl -fsSL https://raw.githubusercontent.com/theplant/plantbuild/master/plantbuild > /usr/local/bin/plantbuild && sudo chmod +x /usr/local/bin/plantbuild
 ```
 
 ## Command Manual
