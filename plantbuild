@@ -9,7 +9,7 @@ shift
 version=
 app=
 
-usage="Usage: plantbuild run/push ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
+usage="Usage: plantbuild run/push/show ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
 while getopts "v:a:" opt; do
   case $opt in
