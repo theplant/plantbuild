@@ -1,8 +1,8 @@
 local modules = [
-    "accounting",
-    "inventory",
+  'accounting',
+  'inventory',
 ];
 
 local dc = import 'dc.jsonnet';
 
-dc.go_test("theplant/example", modules, ["postgres", "elasticsearch", "nats", "redis"])
+dc.go_test('theplant/example', modules, ['postgres', 'elasticsearch', 'nats', 'redis'])
