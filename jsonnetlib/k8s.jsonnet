@@ -10,19 +10,23 @@
         imagePullSecrets=defaultImagePullSecrets,
         image="",
         port=4000
-    ):: [
-        root.deployment(
-            namespace=namespace,
-            name=name,
-            image=image,
-            port=port,
-            configmap=configmap,
-            replicas=replicas,
-            imagePullSecrets=imagePullSecrets
-        ),
-        root.svc(namespace, name, port),
-        root.ingress(namespace, name, port, host, path),
-    ],
+    ):: {
+        apiVersion: "v1",
+        kind: "List",
+        items: [
+            root.deployment(
+                namespace=namespace,
+                name=name,
+                image=image,
+                port=port,
+                configmap=configmap,
+                replicas=replicas,
+                imagePullSecrets=imagePullSecrets
+            ),
+            root.svc(namespace, name, port),
+            root.ingress(namespace, name, port, host, path),
+        ],
+    },
 
     svc(namespace, name, port):: {
       apiVersion: "v1",
@@ -95,9 +99,9 @@
             fullimage(namespace, name)
         else
             image,
-    local a = std.trace( fimg),
+
       local cfgmap = if std.length(configmap) == 0 then
-            "cm-%" % name
+            "cm-%s" % name
         else
             configmap,
 
@@ -128,7 +132,7 @@
                 envFrom: [
                     {
                         configMapRef: {
-                            name: configmap,
+                            name: cfgmap,
                         },
                     },
                 ],
