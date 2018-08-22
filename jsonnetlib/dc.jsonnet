@@ -1,9 +1,6 @@
 {
     local root = self,
-    local v = std.extVar("VERSION"),
-    local version = if std.length(v) == 0 then
-                        error "version is empty"
-                    else v,
+    local version = import 'version.jsonnet',
 
     go_test(pkg, modules, deps):: {
         local projectRoot = "/go/src/github.com/%s" % pkg,

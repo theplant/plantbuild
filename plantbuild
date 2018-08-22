@@ -46,6 +46,9 @@ case $subcommand in
         docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - build build_image_$app && \
         docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - push build_image_$app
         ;;
+    show)
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild
+        ;;
     * )
         echo "$usage"
         exit 1
