@@ -35,6 +35,10 @@ if ! [ -e $jsonnetfile ]; then
     exit 1
 fi
 
+if [ -z $version ]; then
+    version=$(git rev-parse HEAD|cut -c 1-6)
+fi
+
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
 
