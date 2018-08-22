@@ -1,5 +1,3 @@
 local v = std.extVar("VERSION");
-if std.length(v) == 0 then
-    error "version is empty"
-else
-    v
+assert std.length(v) > 0 : "version is empty";
+v
