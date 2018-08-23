@@ -8,14 +8,23 @@ shift
 
 version=
 app=
+_app=
+
+buildversion=
 
 usage="Usage: plantbuild run/push/show ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
-while getopts "v:a:" opt; do
+while getopts "v:a:b:" opt; do
   case $opt in
-    v ) version=$OPTARG
+    v )
+        version=$OPTARG
       ;;
-    a ) app=$OPTARG
+    a )
+        app=$OPTARG
+        _app=_$OPTARG
+      ;;
+    b )
+        buildversion=":$OPTARG"
       ;;
     \? )
         echo "$usage"
@@ -39,19 +48,40 @@ if [ -z $version ]; then
     version=$(git rev-parse HEAD|cut -c 1-6)
 fi
 
+tag_version=$(git describe --tags --exact-match)
+
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
 
+push_image() {
+    build_image $1 && \
+    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push build_image$_app
+}
+
+build_image() {
+    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build build_image$_app
+}
+
 case $subcommand in
     run)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - run "$app"_test
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - run "$app"_test
+        ;;
+    build)
+        build_image "latest" && \
+        build_image $version && \
+        if ! [ -z $tag_version ]; then
+            build_image $tag_version
+        fi
         ;;
     push)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - build build_image_$app && \
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild | docker-compose -f - push build_image_$app
+        push_image "latest" && \
+        push_image $version && \
+        if ! [ -z $tag_version ]; then
+            push_image $tag_version
+        fi
         ;;
     show)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion
         ;;
     * )
         echo "$usage"

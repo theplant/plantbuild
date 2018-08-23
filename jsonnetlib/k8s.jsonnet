@@ -4,7 +4,7 @@
   local fullimage(namespace, name) = 'registry.theplant-dev.com/theplant/%s-%s:%s' % [namespace, name, version],
   local defaultImagePullSecrets = 'theplant-registry-secrets',
 
-  image2url(
+  image_to_url(
     namespace,
     name,
     host,

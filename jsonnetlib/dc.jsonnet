@@ -2,7 +2,7 @@
   local root = self,
   local version = import 'version.jsonnet',
 
-  go_test(pkg, modules, deps):: {
+  go_apps_test(pkg, apps, deps):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
     local image = 'registry.theplant-dev.com/%s_dep:%s' % [pkg, version],
 
@@ -17,7 +17,28 @@
         env_file: './%s/test.env' % m,
         depends_on: deps,
       }
-      for m in modules
+      for m in apps
+    } + {
+      [name]: root.deps[name]
+      for name in deps
+    },
+  },
+
+  go_test(pkg, deps):: {
+    local projectRoot = '/go/src/github.com/%s' % pkg,
+    local image = 'registry.theplant-dev.com/%s_dep:%s' % [pkg, version],
+
+    version: '3',
+    services: {
+      test: {
+        image: image,
+        volumes: [
+          '.:%s' % projectRoot,
+        ],
+        entrypoint: 'go test -v -p=1 ./...',
+        env_file: './test.env',
+        depends_on: deps,
+      },
     } + {
       [name]: root.deps[name]
       for name in deps
@@ -41,7 +62,7 @@
     },
   },
 
-  build_app_image(pkg, modules):: {
+  build_apps_image(pkg, apps):: {
     version: '3',
     services: {
       ['build_image_%s' % m]: {
@@ -55,7 +76,24 @@
         },
         image: 'registry.theplant-dev.com/%s-%s:%s' % [pkg, m, version],
       }
-      for m in modules
+      for m in apps
+    },
+  },
+
+  build_image(pkg):: {
+    version: '3',
+    services: {
+      build_image: {
+        build: {
+          context: '.',
+          dockerfile: './Dockerfile',
+          args: [
+            'GITHUB_TOKEN=$GITHUB_TOKEN',
+            'NPM_TOKEN=$NPM_TOKEN',
+          ],
+        },
+        image: 'registry.theplant-dev.com/%s:%s' % [pkg, version],
+      },
     },
   },
 
