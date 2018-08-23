@@ -21,7 +21,9 @@ while getopts "v:a:b:" opt; do
       ;;
     a )
         app=$OPTARG
-        _app=_$OPTARG
+        if ! [ -z $app ]; then
+            _app=_$OPTARG
+        fi
       ;;
     b )
         buildversion=":$OPTARG"
@@ -48,7 +50,7 @@ if [ -z $version ]; then
     version=$(git rev-parse HEAD|cut -c 1-6)
 fi
 
-tag_version=$(git describe --tags --exact-match)
+tag_version=$(git describe --tags --exact-match 2>/dev/null)
 
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
