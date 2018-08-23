@@ -8,7 +8,7 @@ shift
 
 version=
 app=
-_app=
+dcservice=
 
 buildversion=
 
@@ -22,7 +22,7 @@ while getopts "v:a:b:" opt; do
     a )
         app=$OPTARG
         if ! [ -z $app ]; then
-            _app=_$OPTARG
+            dcservice=build_image_$OPTARG
         fi
       ;;
     b )
@@ -57,11 +57,11 @@ filename=`basename $jsonnetfile`
 
 push_image() {
     build_image $1 && \
-    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push build_image$_app
+    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push $dcservice
 }
 
 build_image() {
-    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build build_image$_app
+    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build $dcservice
 }
 
 case $subcommand in
