@@ -1,7 +1,7 @@
 {
   local root = self,
   local version = import 'version.jsonnet',
-  local fullimage(namespace, name) = 'registry.theplant-dev.com/theplant/%s-%s:%s' % [namespace, name, version],
+  local fullimage(namespace, name) = 'registry.theplant-dev.com/%s/%s:%s' % [namespace, name, version],
   local defaultImagePullSecrets = 'theplant-registry-secrets',
 
   image_to_url(

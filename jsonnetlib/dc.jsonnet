@@ -2,9 +2,14 @@
   local root = self,
   local version = import 'version.jsonnet',
 
+  local image_path(pkg, app, version) =
+    local reg_ns = std.split(pkg, "/")[1];
+    'registry.theplant-dev.com/%s/%s:%s' % [reg_ns, app, version]
+    ,
+
   go_apps_test(pkg, apps, deps):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
-    local image = 'registry.theplant-dev.com/%s_dep:%s' % [pkg, version],
+    local image = image_path(pkg, "dep", version),
 
     version: '3',
     services: {
@@ -26,7 +31,7 @@
 
   go_test(pkg, deps):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
-    local image = 'registry.theplant-dev.com/%s_dep:%s' % [pkg, version],
+    local image = 'registry.theplant-dev.com/%s-dep:%s' % [pkg, version],
 
     version: '3',
     services: {
@@ -45,7 +50,7 @@
     },
   },
 
-  go_build_dep_image(pkg):: {
+  go_build_dep_image(pkg, for_multiple_apps=true):: {
     version: '3',
     services: {
       dep_image: {
@@ -57,7 +62,7 @@
             'WORKDIR=/go/src/github.com/%s' % pkg,
           ],
         },
-        image: 'registry.theplant-dev.com/%s-dep:%s' % [pkg, version],
+        image: if for_multiple_apps then image_path(pkg, 'dep', version) else 'registry.theplant-dev.com/%s-dep:%s' % [pkg, version],
       },
     },
   },
@@ -74,7 +79,7 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        image: 'registry.theplant-dev.com/%s-%s:%s' % [pkg, m, version],
+        image: image_path(pkg, m, version),
       }
       for m in apps
     },
