@@ -55,7 +55,7 @@
   go_build_dep_image(pkg, for_multiple_apps=true):: {
     version: '3',
     services: {
-      dep_image: {
+      build_image: {
         build: {
           context: '.',
           dockerfile: './Dep.Dockerfile',
