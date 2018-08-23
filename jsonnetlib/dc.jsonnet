@@ -4,10 +4,12 @@
 
   local image_path(pkg, app, version) =
     local reg_ns = std.split(pkg, "/")[1];
-    'registry.theplant-dev.com/%s/%s:%s' % [reg_ns, app, version]
+    '%s/%s/%s:%s' % [root.docker_registry, reg_ns, app, version]
     ,
 
-  go_apps_test(pkg, apps, deps):: {
+  docker_registry: "registry.theplant-dev.com",
+
+  go_apps_test(pkg, apps, deps=[],):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
     local image = image_path(pkg, "dep", version),
 
@@ -29,9 +31,9 @@
     },
   },
 
-  go_test(pkg, deps):: {
+  go_test(pkg, deps=[]):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
-    local image = 'registry.theplant-dev.com/%s-dep:%s' % [pkg, version],
+    local image = '%s/%s-dep:%s' % [root.docker_registry, pkg, version],
 
     version: '3',
     services: {
@@ -62,7 +64,7 @@
             'WORKDIR=/go/src/github.com/%s' % pkg,
           ],
         },
-        image: if for_multiple_apps then image_path(pkg, 'dep', version) else 'registry.theplant-dev.com/%s-dep:%s' % [pkg, version],
+        image: if for_multiple_apps then image_path(pkg, 'dep', version) else '%s/%s-dep:%s' % [root.docker_registry, pkg, version],
       },
     },
   },
@@ -97,7 +99,7 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        image: 'registry.theplant-dev.com/%s:%s' % [pkg, version],
+        image: '%s/%s:%s' % [root.docker_registry, pkg, version],
       },
     },
   },

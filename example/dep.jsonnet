@@ -1,3 +1,7 @@
 local dc = import 'dc.jsonnet';
 
-dc.go_build_dep_image('theplant/example')
+local ndc = dc {
+    docker_registry: "hub.c.163.com",
+};
+
+ndc.go_build_dep_image('theplant/example')
