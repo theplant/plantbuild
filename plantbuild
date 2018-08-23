@@ -47,7 +47,7 @@ if ! [ -e $jsonnetfile ]; then
 fi
 
 if [ -z $version ]; then
-    version=$(git rev-parse HEAD|cut -c 1-6)
+    version=$(git rev-parse HEAD|cut -c 1-7)
 fi
 
 tag_version=$(git describe --tags --exact-match 2>/dev/null)
