@@ -70,18 +70,24 @@
   },
 
   build_apps_image(pkg, apps):: {
+    local to_obj(m) = if std.type(m) == 'object' then
+        m
+      else
+        {name: m, dockerfile: './%s/Dockerfile' % m},
+
     version: '3',
     services: {
-      ['build_image_%s' % m]: {
+
+      ['build_image_%s' % to_obj(m).name]: {
         build: {
           context: '.',
-          dockerfile: './%s/Dockerfile' % m,
+          dockerfile: to_obj(m).dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        image: image_path(pkg, m, version),
+        image: image_path(pkg, to_obj(m).name, version),
       }
       for m in apps
     },
