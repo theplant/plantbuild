@@ -10,18 +10,35 @@
   docker_registry: "registry.theplant-dev.com",
 
   go_apps_test(pkg, apps, deps=[],):: {
-    local projectRoot = '/go/src/github.com/%s' % pkg,
+    local to_obj(m) =
+      local projectRoot = '/go/src/github.com/%s' % pkg;
+      local name = if std.type(m) == "object" then
+          m.name
+        else
+          m;
+
+      local default = {
+        mount: projectRoot,
+        entrypoint: 'go test -v -p=1 ./%s/...' % name,
+        test_env: './%s/test.env' % name,
+      };
+
+      if std.type(m) == "object" then
+        default + m
+      else
+        default + { name: m },
+
     local image = image_path(pkg, "dep", version),
 
     version: '3',
     services: {
-      ['%s_test' % m]: {
+      ['%s_test' % to_obj(m).name]: {
         image: image,
         volumes: [
-          '.:%s' % projectRoot,
+          '.:%s' % to_obj(m).mount,
         ],
-        entrypoint: 'go test -v -p=1 ./%s/...' % m,
-        env_file: './%s/test.env' % m,
+        entrypoint: to_obj(m).entrypoint,
+        env_file: to_obj(m).test_env,
         depends_on: deps,
       }
       for m in apps
@@ -114,9 +131,9 @@
     postgres: {
       image: 'postgres:9.6.6',
       environment: [
-        'POSTGRES_USER=ec',
+        'POSTGRES_USER=db',
         'POSTGRES_PASSWORD=123',
-        'POSTGRES_DB=ec_test',
+        'POSTGRES_DB=db_test',
       ],
       ports: [
         '5001:5432',
