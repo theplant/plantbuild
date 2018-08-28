@@ -69,6 +69,26 @@
     },
   },
 
+  node_apps_test(apps):: {
+    version: '3',
+    services: {
+      ["%s_test" % m]: {
+        build: {
+          context: './%s' % m,
+          dockerfile: './Test.Dockerfile',
+          args: [
+            'NPM_TOKEN=$NPM_TOKEN',
+          ],
+        },
+        volumes: [
+          './%s:/app' % m,
+        ],
+        entrypoint: "yarn ci",
+      }
+      for m in apps
+    }
+  },
+
   go_build_dep_image(pkg, for_multiple_apps=true):: {
     version: '3',
     services: {
@@ -87,17 +107,28 @@
   },
 
   build_apps_image(pkg, apps):: {
-    local to_obj(m) = if std.type(m) == 'object' then
-        m
+    local to_obj(m) =
+      local name = if std.type(m) == "object" then
+          m.name
+        else
+          m;
+      local default = {
+        name: name,
+        dockerfile: './%s/Dockerfile' % name,
+        context: '.',
+      };
+
+      if std.type(m) == 'object' then
+        default + m
       else
-        {name: m, dockerfile: './%s/Dockerfile' % m},
+        default,
 
     version: '3',
     services: {
 
       ['build_image_%s' % to_obj(m).name]: {
         build: {
-          context: '.',
+          context: to_obj(m).context,
           dockerfile: to_obj(m).dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
