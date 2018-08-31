@@ -80,9 +80,6 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        volumes: [
-          './%s:/app' % m,
-        ],
         entrypoint: "yarn ci",
       }
       for m in apps
