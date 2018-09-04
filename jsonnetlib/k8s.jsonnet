@@ -24,7 +24,9 @@
     replicas=1,
     imagePullSecrets=defaultImagePullSecrets,
     image='',
-    port=4000
+    port=4000,
+    memoryLimit="200Mi",
+    cpuLimit='500m',
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -36,7 +38,9 @@
         port=port,
         configmap=configmap,
         replicas=replicas,
-        imagePullSecrets=imagePullSecrets
+        imagePullSecrets=imagePullSecrets,
+        memoryLimit=memoryLimit,
+        cpuLimit=cpuLimit,
       ),
       root.svc(namespace, name, port),
       root.ingress(namespace, name, port, host, path),
@@ -110,6 +114,8 @@
     image='',
     port=4000,
     withoutProbe=false,
+    memoryLimit="200Mi",
+    cpuLimit='500m',
   ):: {
     local labels = { app: name },
 
@@ -162,8 +168,8 @@
               ],
               resources: {
                 limits: {
-                  cpu: '500m',
-                  memory: '100Mi',
+                  cpu: cpuLimit,
+                  memory: memoryLimit,
                 },
                 requests: {
                   cpu: '10m',
