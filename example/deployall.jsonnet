@@ -13,5 +13,6 @@ k8s.list([
         namespace = "example",
         name = "app3",
         configmap = "cm-example",
+        withoutProbe = true,
     ),
 ])

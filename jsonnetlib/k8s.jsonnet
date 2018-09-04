@@ -108,7 +108,8 @@
     replicas=1,
     imagePullSecrets=defaultImagePullSecrets,
     image='',
-    port=4000
+    port=4000,
+    withoutProbe=false,
   ):: {
     local labels = { app: name },
 
@@ -159,6 +160,17 @@
                   containerPort: port,
                 },
               ],
+              resources: {
+                limits: {
+                  cpu: '500m',
+                  memory: '100Mi',
+                },
+                requests: {
+                  cpu: '10m',
+                  memory: '10Mi',
+                },
+              },
+            } + if withoutProbe then {} else {
               livenessProbe: {
                 tcpSocket: {
                   port: port,
@@ -172,16 +184,6 @@
                 },
                 initialDelaySeconds: 5,
                 periodSeconds: 10,
-              },
-              resources: {
-                limits: {
-                  cpu: '500m',
-                  memory: '100Mi',
-                },
-                requests: {
-                  cpu: '10m',
-                  memory: '10Mi',
-                },
               },
             },
           ],
