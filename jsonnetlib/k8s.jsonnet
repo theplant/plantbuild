@@ -4,6 +4,17 @@
   local fullimage(namespace, name) = 'registry.theplant-dev.com/%s/%s:%s' % [namespace, name, version],
   local defaultImagePullSecrets = 'theplant-registry-secrets',
 
+  list(items)::
+    local make_items(items) = if std.type(items) == "array" then
+            [make_items(it) for it in items]
+        else if std.type(items) == "object" && items.kind == 'List' then
+            items.items
+        else
+            [items];
+    {apiVersion: "v1"} +
+    {kind: "List"} +
+    {items: std.flattenArrays(make_items(items))},
+
   image_to_url(
     namespace,
     name,
