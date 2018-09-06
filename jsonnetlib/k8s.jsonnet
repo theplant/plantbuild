@@ -138,6 +138,13 @@
     },
     spec: {
       replicas: replicas,
+      strategy: {
+          rollingUpdate: {
+              maxSurge: 1,
+              maxUnavailable: 0,
+          },
+          type: 'RollingUpdate',
+      },
       template: {
         metadata: {
           labels: labels,
