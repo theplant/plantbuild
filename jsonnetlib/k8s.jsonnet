@@ -3,17 +3,49 @@
   local version = import 'version.jsonnet',
   local fullimage(namespace, name) = 'registry.theplant-dev.com/%s/%s:%s' % [namespace, name, version],
   local defaultImagePullSecrets = 'theplant-registry-secrets',
+  local resolve_image(namespace, name, image) = if std.length(image) == 0 then
+    fullimage(namespace, name)
+  else
+    image,
+
+  patch_deployment_image(
+    namespace,
+    name,
+    image='',
+  ):: [
+    {
+      op: 'replace',
+      path: '/spec/template/spec/containers/0/image',
+      value: resolve_image(namespace, name, image),
+    },
+  ],
+
+  patch_deployment_env(
+    env,
+  ):: [
+    {
+      op: 'replace',
+      path: '/spec/template/spec/containers/0/env',
+      value: [
+        {
+          name: k,
+          value: env[k],
+        }
+        for k in std.objectFields(env)
+      ],
+    },
+  ],
 
   list(items)::
-    local make_items(items) = if std.type(items) == "array" then
-            [make_items(it) for it in items]
-        else if std.type(items) == "object" && items.kind == 'List' then
-            items.items
-        else
-            [items];
-    {apiVersion: "v1"} +
-    {kind: "List"} +
-    {items: std.flattenArrays(make_items(items))},
+    local make_items(items) = if std.type(items) == 'array' then
+      [make_items(it) for it in items]
+    else if std.type(items) == 'object' && items.kind == 'List' then
+      items.items
+    else
+      [items];
+    { apiVersion: 'v1' } +
+    { kind: 'List' } +
+    { items: std.flattenArrays(make_items(items)) },
 
   image_to_url(
     namespace,
@@ -25,7 +57,7 @@
     imagePullSecrets=defaultImagePullSecrets,
     image='',
     port=4000,
-    memoryLimit="200Mi",
+    memoryLimit='200Mi',
     cpuLimit='500m',
   ):: {
     apiVersion: 'v1',
@@ -114,20 +146,10 @@
     image='',
     port=4000,
     withoutProbe=false,
-    memoryLimit="200Mi",
+    memoryLimit='200Mi',
     cpuLimit='500m',
   ):: {
     local labels = { app: name },
-
-    local fimg = if std.length(image) == 0 then
-      fullimage(namespace, name)
-    else
-      image,
-
-    local cfgmap = if std.length(configmap) == 0 then
-      'cm-%s' % name
-    else
-      configmap,
 
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
@@ -139,11 +161,11 @@
     spec: {
       replicas: replicas,
       strategy: {
-          rollingUpdate: {
-              maxSurge: 1,
-              maxUnavailable: 0,
-          },
-          type: 'RollingUpdate',
+        rollingUpdate: {
+          maxSurge: 1,
+          maxUnavailable: 0,
+        },
+        type: 'RollingUpdate',
       },
       template: {
         metadata: {
@@ -158,13 +180,12 @@
           containers: [
             {
               name: name,
-              image: fimg,
+              image: resolve_image(namespace, name, image),
               imagePullPolicy: 'IfNotPresent',
-              envFrom: [
+              env: [
                 {
-                  configMapRef: {
-                    name: cfgmap,
-                  },
+                  name: 'test_name',
+                  value: 'test_value',
                 },
               ],
               ports: [
@@ -197,7 +218,15 @@
                 },
                 initialDelaySeconds: 5,
                 periodSeconds: 10,
-              },
+              } + if std.length(configmap) > 0 then {
+                envFrom: [
+                  {
+                    configMapRef: {
+                      name: configmap,
+                    },
+                  },
+                ],
+              } else {},
             },
           ],
         },
