@@ -3,19 +3,19 @@
   local version = import 'version.jsonnet',
 
   local image_path(pkg, app, version) =
-    local reg_ns = std.split(pkg, "/")[1];
+    local reg_ns = std.split(pkg, '/')[1];
     '%s/%s/%s:%s' % [root.docker_registry, reg_ns, app, version]
-    ,
+  ,
 
-  docker_registry: "registry.theplant-dev.com",
+  docker_registry: 'registry.theplant-dev.com',
 
   go_apps_test(pkg, apps, deps=[],):: {
     local to_obj(m) =
       local projectRoot = '/go/src/github.com/%s' % pkg;
-      local name = if std.type(m) == "object" then
-          m.name
-        else
-          m;
+      local name = if std.type(m) == 'object' then
+        m.name
+      else
+        m;
 
       local default = {
         mount: projectRoot,
@@ -23,12 +23,12 @@
         test_env: './%s/test.env' % name,
       };
 
-      if std.type(m) == "object" then
+      if std.type(m) == 'object' then
         default + m
       else
-        default + { name: m },
+        default { name: m },
 
-    local image = image_path(pkg, "dep", version),
+    local image = image_path(pkg, 'dep', version),
 
     version: '3',
     services: {
@@ -72,7 +72,7 @@
   node_apps_test(apps):: {
     version: '3',
     services: {
-      ["%s_test" % m]: {
+      ['%s_test' % m]: {
         build: {
           context: './%s' % m,
           dockerfile: './Test.Dockerfile',
@@ -80,10 +80,10 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        entrypoint: "yarn ci",
+        entrypoint: 'yarn ci',
       }
       for m in apps
-    }
+    },
   },
 
   go_build_dep_image(pkg, for_multiple_apps=true):: {
@@ -105,10 +105,10 @@
 
   build_apps_image(pkg, apps):: {
     local to_obj(m) =
-      local name = if std.type(m) == "object" then
-          m.name
-        else
-          m;
+      local name = if std.type(m) == 'object' then
+        m.name
+      else
+        m;
       local default = {
         name: name,
         dockerfile: './%s/Dockerfile' % name,

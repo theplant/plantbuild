@@ -11,10 +11,11 @@ app=
 dcservice=
 
 buildversion=
+k8sdeploy=
 
-usage="Usage: plantbuild run/push/show ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
+usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
-while getopts "v:a:b:" opt; do
+while getopts "v:a:b:d:" opt; do
   case $opt in
     v )
         version=$OPTARG
@@ -27,6 +28,9 @@ while getopts "v:a:b:" opt; do
       ;;
     b )
         buildversion=":$OPTARG"
+      ;;
+    d )
+        k8sdeploy=$OPTARG
       ;;
     \? )
         echo "$usage"
@@ -46,8 +50,9 @@ if ! [ -e $jsonnetfile ]; then
     exit 1
 fi
 
+githash7=$(git rev-parse HEAD|cut -c 1-7)
 if [ -z $version ]; then
-    version=$(git rev-parse HEAD|cut -c 1-7)
+    version=$githash7
 fi
 
 tag_version=$(git describe --tags --exact-match 2>/dev/null)
@@ -55,13 +60,37 @@ tag_version=$(git describe --tags --exact-match 2>/dev/null)
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
 
+if test -z $KUBECTL; then
+    KUBECTL=kubectl
+fi
+
+# functions
+
 push_image() {
     build_image $1 && \
-    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push $dcservice
+    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push $dcservice
 }
 
 build_image() {
-    docker run --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build $dcservice
+    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build $dcservice
+}
+
+show() {
+    local source=/src/$2
+    if test $2 == '-'; then
+        source='-'
+    fi
+    docker run -i --rm -e RUN=$source -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion
+}
+
+k8scommit() {
+    if show 'latest' $filename | $KUBECTL apply -f - | grep " unchanged"; then
+        echo "latest not changed, so won't create new versions"
+        return 1
+    else
+        show $githash7 $filename | $KUBECTL apply -f -
+        return 0
+    fi
 }
 
 case $subcommand in
@@ -83,7 +112,28 @@ case $subcommand in
         fi
         ;;
     show)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion
+        show $version $filename
+        ;;
+    k8scommit)
+        if k8scommit; then
+            exit 0
+        else
+            exit 1
+        fi
+        ;;
+    k8s_cm_patch)
+        if k8scommit; then
+            meta=$(show $githash7 $filename | jq ".metadata")
+            namespace=$(echo $meta | jq -r ".namespace")
+            configmap=$(echo $meta | jq -r ".name")
+            patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
+            patch=$(echo $patchscript | show $githash7 '-')
+            echo "patching with: ""$patch"
+            $KUBECTL -n $namespace patch deploy/$k8sdeploy --record --type=json -p "$(echo $patch)"
+        fi
+        ;;
+    k8s_apply)
+        show $version $filename | $KUBECTL apply -f -
         ;;
     * )
         echo "$usage"

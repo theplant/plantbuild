@@ -8,6 +8,21 @@
   else
     image,
 
+  configmap(
+    namespace,
+    name,
+    data,
+  ):: {
+    kind: 'ConfigMap',
+    apiVersion: 'v1',
+    metadata: {
+      namespace: namespace,
+      name: '%s-%s' % [name, version],
+    },
+    data: data,
+  },
+
+
   patch_deployment_image(
     namespace,
     name,
@@ -21,17 +36,17 @@
   ],
 
   patch_deployment_env(
-    env,
+    configmap,
   ):: [
     {
       op: 'replace',
-      path: '/spec/template/spec/containers/0/env',
+      path: '/spec/template/spec/containers/0/envFrom',
       value: [
         {
-          name: k,
-          value: env[k],
-        }
-        for k in std.objectFields(env)
+          configMapRef: {
+            name: configmap,
+          },
+        },
       ],
     },
   ],
@@ -182,12 +197,6 @@
               name: name,
               image: resolve_image(namespace, name, image),
               imagePullPolicy: 'IfNotPresent',
-              env: [
-                {
-                  name: 'test_name',
-                  value: 'test_value',
-                },
-              ],
               ports: [
                 {
                   name: 'app',
@@ -218,16 +227,16 @@
                 },
                 initialDelaySeconds: 5,
                 periodSeconds: 10,
-              } + if std.length(configmap) > 0 then {
-                envFrom: [
-                  {
-                    configMapRef: {
-                      name: configmap,
-                    },
+              },
+            } + if std.length(configmap) > 0 then {
+              envFrom: [
+                {
+                  configMapRef: {
+                    name: configmap,
                   },
-                ],
-              } else {},
-            },
+                },
+              ],
+            } else {},
           ],
         },
       },
