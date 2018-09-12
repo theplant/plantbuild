@@ -60,7 +60,7 @@ tag_version=$(git describe --tags --exact-match 2>/dev/null)
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
 
-if test -z $KUBECTL; then
+if test -z "$KUBECTL"; then
     KUBECTL=kubectl
 fi
 
