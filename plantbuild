@@ -60,8 +60,8 @@ tag_version=$(git describe --tags --exact-match 2>/dev/null)
 dir=`dirname $jsonnetfile`
 filename=`basename $jsonnetfile`
 
-if test -z "$KUBECTL"; then
-    KUBECTL=kubectl
+if test -z "$KUBECTL_BASH"; then
+    KUBECTL_BASH="/bin/bash"
 fi
 
 # functions
@@ -83,12 +83,25 @@ show() {
     docker run -i --rm -e RUN=$source -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion
 }
 
+_k() {
+    if test -z "$2"; then
+        echo "kubectl $1"
+        echo "kubectl $1" | $KUBECTL_BASH
+    else
+        content=$(echo $2)
+        echo "echo '$content' | kubectl $1"
+        echo "echo '$content' | kubectl $1" | $KUBECTL_BASH
+    fi
+}
+
 k8scommit() {
-    if show 'latest' $filename | $KUBECTL apply -f - | grep " unchanged"; then
+    content=$(show 'latest' $filename)
+    if _k "apply -f -" "$content" | grep " unchanged"; then
         echo "latest not changed, so won't create new versions"
         return 1
     else
-        show $githash7 $filename | $KUBECTL apply -f -
+        content=$(show $githash7 $filename)
+        _k "apply -f -" "$content"
         return 0
     fi
 }
@@ -129,11 +142,12 @@ case $subcommand in
             patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
             patch=$(echo $patchscript | show $githash7 '-')
             echo "patching with: ""$patch"
-            $KUBECTL -n $namespace patch deploy/$k8sdeploy --record --type=json -p "$(echo $patch)"
+            _k "-n $namespace patch deploy/$k8sdeploy --record --type=json -p \"$(echo $patch)\""
         fi
         ;;
     k8s_apply)
-        show $version $filename | $KUBECTL apply -f -
+        content=$(show $version $filename)
+        _k "apply -f -" "$content"
         ;;
     * )
         echo "$usage"
