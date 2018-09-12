@@ -1,4 +1,8 @@
-find . -name '*.jsonnet' | xargs jsonnet fmt -i && \
+if which jsonnet; then
+    echo "formatting code"
+    find . -name '*.jsonnet' | xargs jsonnet fmt -i
+fi
+
 ./plantbuild build ./build.jsonnet && \
 ./plantbuild show ./example/build.jsonnet -v 1.0.0 && \
 ./plantbuild show ./example/dep.jsonnet -v 1.0.0 && \
