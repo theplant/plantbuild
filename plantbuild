@@ -59,7 +59,7 @@ filename=`basename $jsonnetfile`
 if test -z "$KUBECTL_BASH"; then
     KUBECTL_BASH="/bin/bash"
 fi
-dockerimage='sunfmin/plantbuild'
+dockerimage='theplant/plantbuild'
 # functions
 
 push_image() {
