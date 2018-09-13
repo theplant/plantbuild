@@ -10,6 +10,7 @@ cfg {
   configmap(
     namespace,
     name,
+    deployment,
     data,
   ):: {
     kind: 'ConfigMap',
@@ -17,6 +18,9 @@ cfg {
     metadata: {
       namespace: namespace,
       name: '%s-%s' % [name, root.version],
+      labels: {
+        deployment: deployment,
+      },
     },
     data: data,
   },

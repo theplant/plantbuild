@@ -5,5 +5,5 @@ k8s.image_to_url(
   name='app1',
   host='app1.example.theplant-dev.com',
   path='/',
-  configmap='cm-example',
+  configmap='cm-app1-latest',
 )

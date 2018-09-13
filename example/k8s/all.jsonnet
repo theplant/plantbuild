@@ -1,7 +1,7 @@
 local k8s = import 'k8s.jsonnet';
 
 k8s.list([
-  import './deploy.jsonnet',
+  import './app1.jsonnet',
   k8s.image_to_url(
     namespace='example',
     name='app2',

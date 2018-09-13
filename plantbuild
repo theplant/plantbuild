@@ -11,11 +11,10 @@ app=
 dcservice=
 
 buildversion=
-k8sdeploy=
 
 usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
-while getopts "v:a:b:d:" opt; do
+while getopts "v:a:b:" opt; do
   case $opt in
     v )
         version=$OPTARG
@@ -28,9 +27,6 @@ while getopts "v:a:b:d:" opt; do
       ;;
     b )
         buildversion=":$OPTARG"
-      ;;
-    d )
-        k8sdeploy=$OPTARG
       ;;
     \? )
         echo "$usage"
@@ -85,7 +81,7 @@ show() {
 
 _k() {
     if test -z "$2"; then
-        # echo "kubectl $1"
+        echo "kubectl $1"
         echo "kubectl $1" | $KUBECTL_BASH
     else
         content=$(echo $2)
@@ -139,10 +135,11 @@ case $subcommand in
             meta=$(show $githash7 $filename | jq ".metadata")
             namespace=$(echo $meta | jq -r ".namespace")
             configmap=$(echo $meta | jq -r ".name")
+            deployment=$(echo $meta | jq -r ".labels.deployment")
             patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
             patch=$(echo $patchscript | show $githash7 '-')
             echo "patching with: ""$patch"
-            _k "-n $namespace patch deploy/$k8sdeploy --record --type=json -p \"$(echo $patch)\""
+            _k "-n $namespace patch deploy/$deployment --record --type=json -p \"$(echo $patch)\""
         fi
         ;;
     k8s_apply)
