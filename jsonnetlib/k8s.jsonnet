@@ -1,8 +1,7 @@
-{
+local cfg = import 'config.jsonnet';
+cfg {
   local root = self,
-  local version = import 'version.jsonnet',
-  local fullimage(namespace, name) = 'registry.theplant-dev.com/%s/%s:%s' % [namespace, name, version],
-  local defaultImagePullSecrets = 'theplant-registry-secrets',
+  local fullimage(namespace, name) = root.with_registry('%s/%s:%s' % [namespace, name, root.version]),
   local resolve_image(namespace, name, image) = if std.length(image) == 0 then
     fullimage(namespace, name)
   else
@@ -17,7 +16,7 @@
     apiVersion: 'v1',
     metadata: {
       namespace: namespace,
-      name: '%s-%s' % [name, version],
+      name: '%s-%s' % [name, root.version],
     },
     data: data,
   },
@@ -69,7 +68,7 @@
     path,
     configmap='',
     replicas=1,
-    imagePullSecrets=defaultImagePullSecrets,
+    imagePullSecrets=root.defaultImagePullSecrets,
     image='',
     port=4000,
     memoryLimit='200Mi',
@@ -157,7 +156,7 @@
     name,
     configmap='',
     replicas=1,
-    imagePullSecrets=defaultImagePullSecrets,
+    imagePullSecrets=root.defaultImagePullSecrets,
     image='',
     port=4000,
     withoutProbe=false,

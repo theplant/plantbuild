@@ -1,3 +1,5 @@
 local dc = import 'dc.jsonnet';
-
-dc.build_image('theplant/plantbuild')
+local ndc = dc {
+  dockerRegistry: '',
+};
+ndc.build_image('sunfmin/plantbuild')

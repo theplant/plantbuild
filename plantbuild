@@ -63,16 +63,16 @@ filename=`basename $jsonnetfile`
 if test -z "$KUBECTL_BASH"; then
     KUBECTL_BASH="/bin/bash"
 fi
-
+dockerimage='sunfmin/plantbuild'
 # functions
 
 push_image() {
     build_image $1 && \
-    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - push $dcservice
+    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - push $dcservice
 }
 
 build_image() {
-    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - build $dcservice
+    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - build $dcservice
 }
 
 show() {
@@ -80,7 +80,7 @@ show() {
     if test $2 == '-'; then
         source='-'
     fi
-    docker run -i --rm -e RUN=$source -e VERSION=$1 -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion
+    docker run -i --rm -e RUN=$source -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion
 }
 
 _k() {

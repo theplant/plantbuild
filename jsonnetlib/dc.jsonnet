@@ -1,13 +1,10 @@
-{
+local cfg = import 'config.jsonnet';
+cfg {
   local root = self,
-  local version = import 'version.jsonnet',
-
   local image_path(pkg, app, version) =
     local reg_ns = std.split(pkg, '/')[1];
-    '%s/%s/%s:%s' % [root.docker_registry, reg_ns, app, version]
+    root.with_registry('%s/%s:%s' % [reg_ns, app, version])
   ,
-
-  docker_registry: 'registry.theplant-dev.com',
 
   go_apps_test(pkg, apps, deps=[],):: {
     local to_obj(m) =
@@ -28,7 +25,7 @@
       else
         default { name: m },
 
-    local image = image_path(pkg, 'dep', version),
+    local image = image_path(pkg, 'dep', root.version),
 
     version: '3',
     services: {
@@ -50,8 +47,7 @@
 
   go_test(pkg, deps=[]):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
-    local image = '%s/%s-dep:%s' % [root.docker_registry, pkg, version],
-
+    local image = root.with_registry('%s-dep:%s' % [pkg, root.version]),
     version: '3',
     services: {
       test: {
@@ -98,7 +94,7 @@
             'WORKDIR=/go/src/github.com/%s' % pkg,
           ],
         },
-        image: if for_multiple_apps then image_path(pkg, 'dep', version) else '%s/%s-dep:%s' % [root.docker_registry, pkg, version],
+        image: if for_multiple_apps then image_path(pkg, 'dep', root.version) else root.with_registry('%s-dep:%s' % [pkg, root.version]),
       },
     },
   },
@@ -132,7 +128,7 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        image: image_path(pkg, to_obj(m).name, version),
+        image: image_path(pkg, to_obj(m).name, root.version),
       }
       for m in apps
     },
@@ -150,7 +146,7 @@
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
-        image: '%s/%s:%s' % [root.docker_registry, pkg, version],
+        image: root.with_registry('%s:%s' % [pkg, root.version]),
       },
     },
   },
