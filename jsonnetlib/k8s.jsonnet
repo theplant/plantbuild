@@ -123,6 +123,7 @@ cfg {
   },
 
   ingress(namespace, name, port, host, path='/'):: {
+    local hosts = if std.type(host) == 'array' then host else [host],
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -138,7 +139,7 @@ cfg {
     spec: {
       rules: [
         {
-          host: host,
+          host: h,
           http: {
             paths: [
               {
@@ -150,7 +151,8 @@ cfg {
               },
             ],
           },
-        },
+        }
+        for h in hosts
       ],
     },
   },
@@ -168,7 +170,31 @@ cfg {
     cpuLimit='500m',
   ):: {
     local labels = { app: name },
-
+    local probe = if withoutProbe then {} else {
+      livenessProbe: {
+        tcpSocket: {
+          port: port,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+      },
+      readinessProbe: {
+        tcpSocket: {
+          port: port,
+        },
+        initialDelaySeconds: 5,
+        periodSeconds: 10,
+      },
+    },
+    local cm = if std.length(configmap) > 0 then {
+      envFrom: [
+        {
+          configMapRef: {
+            name: configmap,
+          },
+        },
+      ],
+    } else {},
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
     metadata: {
@@ -216,30 +242,7 @@ cfg {
                   memory: '10Mi',
                 },
               },
-            } + if withoutProbe then {} else {
-              livenessProbe: {
-                tcpSocket: {
-                  port: port,
-                },
-                initialDelaySeconds: 5,
-                periodSeconds: 10,
-              },
-              readinessProbe: {
-                tcpSocket: {
-                  port: port,
-                },
-                initialDelaySeconds: 5,
-                periodSeconds: 10,
-              },
-            } + if std.length(configmap) > 0 then {
-              envFrom: [
-                {
-                  configMapRef: {
-                    name: configmap,
-                  },
-                },
-              ],
-            } else {},
+            } + probe + cm,
           ],
         },
       },
