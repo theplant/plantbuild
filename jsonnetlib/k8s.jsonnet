@@ -69,7 +69,7 @@ cfg {
     namespace,
     name,
     host,
-    path,
+    path='/',
     configmap='',
     replicas=1,
     imagePullSecrets=root.defaultImagePullSecrets,
@@ -93,7 +93,7 @@ cfg {
         cpuLimit=cpuLimit,
       ),
       root.svc(namespace, name, port),
-      root.ingress(namespace, name, port, host, path),
+      root.single_svc_ingress(namespace, name, port, host, path),
     ],
   },
 
@@ -122,8 +122,28 @@ cfg {
     },
   },
 
-  ingress(namespace, name, port, host, path='/'):: {
-    local hosts = if std.type(host) == 'array' then host else [host],
+  single_svc_ingress(namespace, name, port, host, path='/')::
+    local hosts = if std.type(host) == 'array' then host else [host];
+    local rules = [
+      {
+        host: h,
+        http: {
+          paths: [
+            {
+              path: path,
+              backend: {
+                serviceName: name,
+                servicePort: port,
+              },
+            },
+          ],
+        },
+      }
+      for h in hosts
+    ];
+    root.ingress(namespace, name, rules),
+
+  ingress(namespace, name, rules):: {
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -137,23 +157,7 @@ cfg {
       },
     },
     spec: {
-      rules: [
-        {
-          host: h,
-          http: {
-            paths: [
-              {
-                path: path,
-                backend: {
-                  serviceName: name,
-                  servicePort: port,
-                },
-              },
-            ],
-          },
-        }
-        for h in hosts
-      ],
+      rules: rules,
     },
   },
 
