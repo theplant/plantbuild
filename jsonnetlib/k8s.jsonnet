@@ -158,9 +158,7 @@ cfg {
     metadata: {
       name: name,
       namespace: namespace,
-      annotations: {
-        'nginx.ingress.kubernetes.io/rewrite-target': '/',
-      } + annotations,
+      annotations: annotations,
       labels: {
         app: name,
       },
