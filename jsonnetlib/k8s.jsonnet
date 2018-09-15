@@ -78,6 +78,7 @@ cfg {
     port=4000,
     memoryLimit='200Mi',
     cpuLimit='500m',
+    ingressAnnotations={},
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -94,7 +95,14 @@ cfg {
         cpuLimit=cpuLimit,
       ),
       root.svc(namespace, name, port),
-      root.single_svc_ingress(namespace, name, port, host, path),
+      root.single_svc_ingress(
+        namespace=namespace,
+        name=name,
+        port=port,
+        host=host,
+        path=path,
+        annotations=ingressAnnotations,
+      ),
     ],
   },
 
@@ -123,7 +131,7 @@ cfg {
     },
   },
 
-  single_svc_ingress(namespace, name, port, host, path='/')::
+  single_svc_ingress(namespace, name, port, host, path='/', annotations={})::
     local hosts = if std.type(host) == 'array' then host else [host];
     local rules = [
       {
@@ -144,7 +152,7 @@ cfg {
     ];
     root.ingress(namespace, name, rules),
 
-  ingress(namespace, name, rules):: {
+  ingress(namespace, name, rules, annotations={}):: {
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -152,7 +160,7 @@ cfg {
       namespace: namespace,
       annotations: {
         'nginx.ingress.kubernetes.io/rewrite-target': '/',
-      },
+      } + annotations,
       labels: {
         app: name,
       },
