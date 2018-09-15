@@ -12,12 +12,13 @@ cfg {
     name,
     deployment,
     data,
+    withoutVersion=false
   ):: {
     kind: 'ConfigMap',
     apiVersion: 'v1',
     metadata: {
       namespace: namespace,
-      name: '%s-%s' % [name, root.version],
+      name: if withoutVersion then name else '%s-%s' % [name, root.version],
       labels: {
         deployment: deployment,
       },
