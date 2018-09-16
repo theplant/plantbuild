@@ -84,9 +84,9 @@ _k() {
         echo "kubectl $1"
         echo "kubectl $1" | $KUBECTL_BASH
     else
-        content=$(echo $2)
-        # echo "echo '$content' | kubectl $1"
-        echo "echo '$content' | kubectl $1" | $KUBECTL_BASH
+        content=$(printf "%q" "$2")
+        # echo "echo $content | kubectl $1"
+        echo "echo $content | kubectl $1" | $KUBECTL_BASH
     fi
 }
 
