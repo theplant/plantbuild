@@ -1,0 +1,99 @@
+[
+	{
+		"show_args": "./example/build.jsonnet -v 1.0.0",
+		"asserts": [
+			{
+				"jq_path": ".services.build_image_app1.image",
+				"expected": "registry.theplant-dev.com/example/app1:1.0.0"
+			}
+		]
+	},
+	{
+		"show_args": "./example/dep.jsonnet -v 1.0.0",
+		"asserts": [
+			{
+				"jq_path": ".services.build_image.image",
+				"expected": "hub.c.163.com/example/dep:1.0.0"
+			}
+		]
+	},
+	{
+		"show_args": "./example/test.jsonnet -v 1.0.0",
+		"asserts": [
+			{
+				"jq_path": ".services.accounting_test.entrypoint",
+				"expected": "go test -v -p=1 ./accounting/..."
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/app1.jsonnet -v 1.0.0",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].image",
+				"expected": "registry.theplant-dev.com/example/app1:1.0.0"
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/all.jsonnet -v 2.1.0",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].image",
+				"expected": "registry.theplant-dev.com/example/app1:2.1.0"
+			},
+			{
+				"jq_path": ".items[].kind",
+				"expected": "Deployment\nService\nIngress\nDeployment\nService\nIngress\nDeployment\nConfigMap\nConfigMap\nCronJob\nCronJob\n"
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_probe_cm.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".spec.template.spec.containers[0].livenessProbe",
+				"expected": "null"
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_multi_hosts.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[2].spec.rules[].host",
+				"expected": "app1.example.theplant-dev.com\napp1-1.example.theplant-dev.com\napp1-2.example.theplant-dev.com\n"
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_configmap_envmap_pullsecrets.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.imagePullSecrets",
+				"expected": "null"
+			},
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].envFrom[0].configMapRef.name",
+				"expected": "null"
+			},
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].env[0].name",
+				"expected": "null"
+			},
+			{
+				"jq_path": ".items[1].spec.template.spec.imagePullSecrets[0].name",
+				"expected": "myips"
+			},
+			{
+				"jq_path": ".items[1].spec.template.spec.containers[0].envFrom[0].configMapRef.name",
+				"expected": "mycm"
+			},
+			{
+				"jq_path": ".items[1].spec.template.spec.containers[0].env[0].name",
+				"expected": "name1"
+			}
+		]
+	}
+]
+

@@ -288,7 +288,6 @@ cfg {
         periodSeconds: 10,
       },
     },
-    local cm = configmapref(configmap),
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
     metadata: {
@@ -331,7 +330,7 @@ cfg {
                   memory: '10Mi',
                 },
               },
-            } + probe + cm + envRef(envmap),
+            } + probe + configmapref(configmap) + envRef(envmap),
           ],
         } + imagePullSecretsRef(imagePullSecrets),
       },
