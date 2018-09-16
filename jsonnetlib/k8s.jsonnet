@@ -67,6 +67,7 @@ cfg {
     image='',
     imagePullSecrets=root.imagePullSecrets,
     envmap={},
+    container={},
   ):: {
     kind: 'CronJob',
     apiVersion: 'batch/v1beta1',
@@ -105,7 +106,7 @@ cfg {
                   name: name,
                   image: resolve_image(namespace, name, image),
                   imagePullPolicy: 'IfNotPresent',
-                } + configmapref(configmap) + envRef(envmap),
+                } + configmapref(configmap) + envRef(envmap) + container,
               ],
             } + imagePullSecretsRef(imagePullSecrets),
           },
@@ -143,6 +144,22 @@ cfg {
     },
   ],
 
+  patch_cronjob_env(
+    configmap,
+  ):: [
+    {
+      op: 'replace',
+      path: '/spec/jobTemplate/spec/template/spec/containers/0/envFrom',
+      value: [
+        {
+          configMapRef: {
+            name: configmap,
+          },
+        },
+      ],
+    },
+  ],
+
   list(items)::
     local make_items(items) = if std.type(items) == 'array' then
       [make_items(it) for it in items]
@@ -168,6 +185,7 @@ cfg {
     cpuLimit=root.cpuLimit,
     ingressAnnotations={},
     envmap={},
+    container={},
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -271,6 +289,7 @@ cfg {
     withoutProbe=false,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
+    container={},
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {} else {
@@ -331,7 +350,7 @@ cfg {
                   memory: '10Mi',
                 },
               },
-            } + probe + configmapref(configmap) + envRef(envmap),
+            } + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
         } + imagePullSecretsRef(imagePullSecrets),
       },
