@@ -8,8 +8,8 @@ k8s.configmap(
   withoutVersion=true,
   data={
     Hello: |||
-        Value122'abc'
-        &amp;"hello"
+      Value122'abc'
+      &amp;"hello"
     |||,
     MoreTricky: "'Value122'abc&amp;\"hello\"'",
   }

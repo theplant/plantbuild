@@ -35,7 +35,7 @@ cfg {
     } else {},
 
   configmap(
-    namespace,
+    namespace=root.namespace,
     name,
     deployment='',
     cronjob='',
@@ -60,7 +60,7 @@ cfg {
   },
 
   cronjob(
-    namespace,
+    namespace=root.namespace,
     name,
     schedule,
     configmap='',
@@ -116,7 +116,7 @@ cfg {
 
 
   patch_deployment_image(
-    namespace,
+    namespace=root.namespace,
     name,
     image='',
   ):: [
@@ -155,15 +155,15 @@ cfg {
     { items: std.flattenArrays(make_items(items)) },
 
   image_to_url(
-    namespace,
+    namespace=root.namespace,
     name,
-    host,
+    host='',
     path='/',
     configmap='',
     replicas=1,
     imagePullSecrets=root.imagePullSecrets,
     image='',
-    port=4000,
+    port=root.port,
     memoryLimit='200Mi',
     cpuLimit='500m',
     ingressAnnotations={},
@@ -196,7 +196,7 @@ cfg {
     ],
   },
 
-  svc(namespace, name, port):: {
+  svc(namespace=root.namespace, name, port=root.port):: {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
@@ -221,8 +221,9 @@ cfg {
     },
   },
 
-  single_svc_ingress(namespace, name, port, host, path='/', annotations={})::
-    local hosts = if std.type(host) == 'array' then host else [host];
+  single_svc_ingress(namespace=root.namespace, name, port, host='', path='/', annotations={})::
+    local newhost = if std.type(host) != 'array' && std.length(host) == 0 && std.length(root.baseHost) > 0 then '%s.%s' % [name, root.baseHost] else host;
+    local hosts = if std.type(host) == 'array' then host else [newhost];
     local rules = [
       {
         host: h,
@@ -242,7 +243,7 @@ cfg {
     ];
     root.ingress(namespace, name, rules),
 
-  ingress(namespace, name, rules, annotations={}):: {
+  ingress(namespace=root.namespace, name, rules, annotations={}):: {
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -259,7 +260,7 @@ cfg {
   },
 
   deployment(
-    namespace,
+    namespace=root.namespace,
     name,
     configmap='',
     envmap={},

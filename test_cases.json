@@ -94,6 +94,39 @@
 				"expected": "name1"
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_change_default_namespace.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[0].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[1].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[2].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[3].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[4].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[5].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[5].spec.rules[0].host",
+				"expected": "dep2.dt.theplant-dev.com"
+			}
+		]
 	}
 ]
 
