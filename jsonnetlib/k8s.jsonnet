@@ -164,8 +164,8 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     image='',
     port=root.port,
-    memoryLimit='200Mi',
-    cpuLimit='500m',
+    memoryLimit=root.memoryLimit,
+    cpuLimit=root.cpuLimit,
     ingressAnnotations={},
     envmap={},
   ):: {
@@ -264,13 +264,13 @@ cfg {
     name,
     configmap='',
     envmap={},
-    replicas=1,
+    replicas=root.replicas,
     imagePullSecrets=root.imagePullSecrets,
     image='',
-    port=4000,
+    port=root.port,
     withoutProbe=false,
-    memoryLimit='200Mi',
-    cpuLimit='500m',
+    memoryLimit=root.memoryLimit,
+    cpuLimit=root.cpuLimit,
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {} else {

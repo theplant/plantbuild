@@ -8,6 +8,9 @@ assert std.length(v) > 0 : 'version is empty';
   namespace: 'default',
   port: 4000,
   baseHost: '',
+  memoryLimit: '200Mi',
+  cpuLimit: '500m',
+  replicas: 1,
 
   // config helper func
   local root = self,
