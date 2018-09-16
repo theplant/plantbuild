@@ -4,7 +4,7 @@ assert std.length(v) > 0 : 'version is empty';
 {
   version: v,
   dockerRegistry: 'registry.theplant-dev.com',
-  defaultImagePullSecrets: 'theplant-registry-secrets',
+  imagePullSecrets: 'theplant-registry-secrets',
 
   // config helper func
   local root = self,

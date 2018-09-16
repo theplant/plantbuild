@@ -6,24 +6,112 @@ cfg {
     fullimage(namespace, name)
   else
     image,
+  local configmapref(configmap) = if std.length(configmap) > 0 then {
+    envFrom: [
+      {
+        configMapRef: {
+          name: configmap,
+        },
+      },
+    ],
+  } else {},
+  local imagePullSecretsRef(imagePullSecrets) = if std.length(imagePullSecrets) > 0 then
+    {
+      imagePullSecrets: [
+        {
+          name: imagePullSecrets,
+        },
+      ],
+    } else {},
+  local envRef(envmap) = if std.length(std.objectFields(envmap)) > 0 then
+    {
+      env: [
+        {
+          name: n,
+          value: envmap[n],
+        }
+        for n in std.objectFields(envmap)
+      ],
+    } else {},
 
   configmap(
     namespace,
     name,
-    deployment,
+    deployment='',
+    cronjob='',
     data,
     withoutVersion=false
   ):: {
+    assert !(std.length(deployment) == 0 && std.length(cronjob) == 0) : 'deployment or cronjob required',
+    local labels = if std.length(deployment) > 0 then
+      { deployment: deployment }
+    else if std.length(cronjob) > 0 then
+      { cronjob: cronjob }
+    else
+      {},
     kind: 'ConfigMap',
     apiVersion: 'v1',
     metadata: {
       namespace: namespace,
       name: if withoutVersion then name else '%s-%s' % [name, root.version],
-      labels: {
-        deployment: deployment,
-      },
+      labels: labels,
     },
     data: data,
+  },
+
+  cronjob(
+    namespace,
+    name,
+    schedule,
+    configmap='',
+    image='',
+    imagePullSecrets=root.imagePullSecrets,
+    envmap={},
+  ):: {
+    kind: 'CronJob',
+    apiVersion: 'batch/v1beta1',
+
+    metadata: {
+      namespace: namespace,
+      name: name,
+      labels: {
+        app: name,
+      },
+    },
+    spec: {
+      schedule: schedule,
+      concurrencyPolicy: 'Allow',
+      failedJobsHistoryLimit: 10,
+      successfulJobsHistoryLimit: 5,
+      jobTemplate: {
+        metadata: {
+          labels: {
+            app: name,
+          },
+        },
+        spec: {
+          backoffLimit: 1,
+          activeDeadlineSeconds: 30,
+          template: {
+            metadata: {
+              labels: {
+                app: name,
+              },
+            },
+            spec: {
+              restartPolicy: 'Never',
+              containers: [
+                {
+                  name: name,
+                  image: resolve_image(namespace, name, image),
+                  imagePullPolicy: 'IfNotPresent',
+                } + configmapref(configmap) + envRef(envmap),
+              ],
+            } + imagePullSecretsRef(imagePullSecrets),
+          },
+        },
+      },
+    },
   },
 
 
@@ -73,12 +161,13 @@ cfg {
     path='/',
     configmap='',
     replicas=1,
-    imagePullSecrets=root.defaultImagePullSecrets,
+    imagePullSecrets=root.imagePullSecrets,
     image='',
     port=4000,
     memoryLimit='200Mi',
     cpuLimit='500m',
     ingressAnnotations={},
+    envmap={},
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -93,6 +182,7 @@ cfg {
         imagePullSecrets=imagePullSecrets,
         memoryLimit=memoryLimit,
         cpuLimit=cpuLimit,
+        envmap=envmap,
       ),
       root.svc(namespace, name, port),
       root.single_svc_ingress(
@@ -172,8 +262,9 @@ cfg {
     namespace,
     name,
     configmap='',
+    envmap={},
     replicas=1,
-    imagePullSecrets=root.defaultImagePullSecrets,
+    imagePullSecrets=root.imagePullSecrets,
     image='',
     port=4000,
     withoutProbe=false,
@@ -197,15 +288,7 @@ cfg {
         periodSeconds: 10,
       },
     },
-    local cm = if std.length(configmap) > 0 then {
-      envFrom: [
-        {
-          configMapRef: {
-            name: configmap,
-          },
-        },
-      ],
-    } else {},
+    local cm = configmapref(configmap),
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
     metadata: {
@@ -227,11 +310,6 @@ cfg {
           labels: labels,
         },
         spec: {
-          imagePullSecrets: [
-            {
-              name: imagePullSecrets,
-            },
-          ],
           containers: [
             {
               name: name,
@@ -253,9 +331,9 @@ cfg {
                   memory: '10Mi',
                 },
               },
-            } + probe + cm,
+            } + probe + cm + envRef(envmap),
           ],
-        },
+        } + imagePullSecretsRef(imagePullSecrets),
       },
     },
   },
