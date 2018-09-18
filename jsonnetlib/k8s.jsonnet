@@ -115,6 +115,42 @@ cfg {
     },
   },
 
+  secret(
+    namespace=root.namespace,
+    name,
+    data,
+    type='',
+    annotations={},
+  ):: {
+    kind: 'Secret',
+    apiVersion: 'v1',
+    data: data,
+    metadata: {
+      annotations: annotations,
+      namespace: namespace,
+      name: name,
+    },
+    type: if std.length(type) > 0 then
+      type
+    else
+      if std.length(data['.dockerconfigjson']) > 0 then
+        'kubernetes.io/dockerconfigjson'
+      else if std.length(data['ca.crt']) > 0 && std.length(data.token) > 0 then
+        'kubernetes.io/service-account-token'
+      else
+        'Opaque',
+  },
+
+  namespace(
+    name=root.namespace,
+  ):: {
+
+    kind: 'Namespace',
+    apiVersion: 'v1',
+    metadata: {
+      name: name,
+    },
+  },
 
   patch_deployment_image(
     namespace=root.namespace,
