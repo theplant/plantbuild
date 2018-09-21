@@ -35,7 +35,7 @@ cfg {
     } else {},
 
   configmap(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     deployment='',
     cronjob='',
@@ -60,7 +60,7 @@ cfg {
   },
 
   cronjob(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     schedule,
     configmap='',
@@ -116,7 +116,7 @@ cfg {
   },
 
   secret(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     data,
     type='',
@@ -142,7 +142,7 @@ cfg {
   },
 
   namespace(
-    name=root.namespace,
+    name=root.defaultNamespace,
   ):: {
 
     kind: 'Namespace',
@@ -153,7 +153,7 @@ cfg {
   },
 
   patch_deployment_image(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     image='',
   ):: [
@@ -208,7 +208,7 @@ cfg {
     { items: std.flattenArrays(make_items(items)) },
 
   image_to_url(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     host='',
     path='/',
@@ -222,6 +222,7 @@ cfg {
     ingressAnnotations={},
     envmap={},
     container={},
+    volumes=[],
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -237,6 +238,8 @@ cfg {
         memoryLimit=memoryLimit,
         cpuLimit=cpuLimit,
         envmap=envmap,
+        container=container,
+        volumes=volumes,
       ),
       root.svc(namespace, name, port),
       root.single_svc_ingress(
@@ -250,7 +253,7 @@ cfg {
     ],
   },
 
-  svc(namespace=root.namespace, name, port=root.port):: {
+  svc(namespace=root.defaultNamespace, name, port=root.port):: {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
@@ -275,7 +278,7 @@ cfg {
     },
   },
 
-  single_svc_ingress(namespace=root.namespace, name, port, host='', path='/', annotations={})::
+  single_svc_ingress(namespace=root.defaultNamespace, name, port, host='', path='/', annotations={})::
     local newhost = if std.type(host) != 'array' && std.length(host) == 0 && std.length(root.baseHost) > 0 then '%s.%s' % [name, root.baseHost] else host;
     local hosts = if std.type(host) == 'array' then host else [newhost];
     local rules = [
@@ -297,7 +300,7 @@ cfg {
     ];
     root.ingress(namespace, name, rules),
 
-  ingress(namespace=root.namespace, name, rules, annotations={}):: {
+  ingress(namespace=root.defaultNamespace, name, rules, annotations={}):: {
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -314,7 +317,7 @@ cfg {
   },
 
   deployment(
-    namespace=root.namespace,
+    namespace=root.defaultNamespace,
     name,
     configmap='',
     envmap={},
@@ -326,6 +329,7 @@ cfg {
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
     container={},
+    volumes=[],
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {} else {
@@ -344,6 +348,10 @@ cfg {
         periodSeconds: 10,
       },
     },
+    local vols = if std.length(volumes) > 0 then
+      {
+        volumes: volumes,
+      } else {},
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
     metadata: {
@@ -388,7 +396,7 @@ cfg {
               },
             } + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
-        } + imagePullSecretsRef(imagePullSecrets),
+        } + vols + imagePullSecretsRef(imagePullSecrets),
       },
     },
   },

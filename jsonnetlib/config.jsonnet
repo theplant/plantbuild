@@ -5,7 +5,7 @@ assert std.length(v) > 0 : 'version is empty';
   version: v,
   dockerRegistry: 'registry.theplant-dev.com',
   imagePullSecrets: 'theplant-registry-secrets',
-  namespace: 'default',
+  defaultNamespace: 'default',
   port: 4000,
   baseHost: '',
   memoryLimit: '200Mi',

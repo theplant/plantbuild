@@ -1,7 +1,7 @@
 local k8s = import 'k8s.jsonnet';
 
 local nk8s = k8s {
-  namespace: 'myexample2',
+  defaultNamespace: 'myexample2',
   baseHost: 'dt.theplant-dev.com',
 };
 

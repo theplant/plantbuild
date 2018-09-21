@@ -127,6 +127,19 @@
 				"expected": "dep2.dt.theplant-dev.com"
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_volumes.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].volumeMounts[0].mountPath",
+				"expected": "/etc/nginx/ssl"
+			},
+			{
+				"jq_path": ".items[0].spec.template.spec.volumes[0].secret.secretName",
+				"expected": "mysecret"
+			}
+		]
 	}
 ]
 
