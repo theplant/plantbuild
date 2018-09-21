@@ -298,7 +298,7 @@ cfg {
       }
       for h in hosts
     ];
-    root.ingress(namespace, name, rules),
+    root.ingress(namespace, name, rules, annotations),
 
   ingress(namespace=root.defaultNamespace, name, rules, annotations={}):: {
     apiVersion: 'extensions/v1beta1',
