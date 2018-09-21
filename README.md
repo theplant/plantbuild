@@ -194,3 +194,14 @@ A list of functions inside the library:
 - dc.build_apps_image
 
 Checkout [Examples](https://github.com/theplant/plantbuild/tree/master/example) for usage
+
+
+## Develop
+
+### Testing
+
+```
+bash test.sh
+bash test_with_kubectl.sh
+```
+
