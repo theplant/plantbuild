@@ -152,7 +152,7 @@ case $subcommand in
         ;;
     k8s_apply)
         content=$(show $version $filename)
-        _k "apply -f -" "$content"
+        _k "apply --record -f -" "$content"
         ;;
     * )
         echo "$usage"
