@@ -217,6 +217,7 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     image='',
     port=root.port,
+    targetPort=root.port,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
     ingressAnnotations={},
@@ -241,7 +242,7 @@ cfg {
         container=container,
         volumes=volumes,
       ),
-      root.svc(namespace, name, port),
+      root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
         namespace=namespace,
         name=name,
@@ -253,7 +254,7 @@ cfg {
     ],
   },
 
-  svc(namespace=root.defaultNamespace, name, port=root.port):: {
+  svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port):: {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
@@ -269,7 +270,7 @@ cfg {
         {
           name: 'app',
           port: port,
-          targetPort: port,
+          targetPort: targetPort,
         },
       ],
       selector: {
