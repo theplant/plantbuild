@@ -133,9 +133,9 @@ cfg {
     type: if std.length(type) > 0 then
       type
     else
-      if std.length(data['.dockerconfigjson']) > 0 then
+      if std.objectHas(data, '.dockerconfigjson') then
         'kubernetes.io/dockerconfigjson'
-      else if std.length(data['ca.crt']) > 0 && std.length(data.token) > 0 then
+      else if std.objectHas(data, 'ca.crt') && std.objectHas(data, 'token') then
         'kubernetes.io/service-account-token'
       else
         'Opaque',
