@@ -217,6 +217,7 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     image='',
     port=root.port,
+    probes={},
     targetPort=root.port,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
@@ -233,6 +234,7 @@ cfg {
         name=name,
         image=image,
         port=port,
+        probes=probes,
         configmap=configmap,
         replicas=replicas,
         imagePullSecrets=imagePullSecrets,
@@ -326,6 +328,7 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     image='',
     port=root.port,
+    probes={},
     withoutProbe=false,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
@@ -333,7 +336,9 @@ cfg {
     volumes=[],
   ):: {
     local labels = { app: name },
-    local probe = if withoutProbe then {} else {
+    local probe = if withoutProbe then {}
+    else if std.objectHas(probes, 'livenessProbe') || std.objectHas(probes, 'readinessProbe') then probes
+    else {
       livenessProbe: {
         tcpSocket: {
           port: port,
