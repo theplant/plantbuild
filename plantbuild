@@ -104,7 +104,7 @@ k8scommit() {
 
 case $subcommand in
     run)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src registry.theplant-dev.com/theplant/plantbuild$buildversion | docker-compose -f - run "$app"_test
+        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - run "$app"_test
         ;;
     build)
         build_image "latest" && \
