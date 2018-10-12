@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if which jsonnet; then
     printf "Formatting code"
     if find . -name '*.jsonnet' | xargs jsonnet fmt -i; then
