@@ -256,12 +256,13 @@ cfg {
     ],
   },
 
-  svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port):: {
+  svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port, annotations={}):: {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
       name: name,
       namespace: namespace,
+      annotations: annotations,
       labels: {
         app: name,
       },
