@@ -135,6 +135,8 @@ cfg {
     else
       if std.objectHas(data, '.dockerconfigjson') then
         'kubernetes.io/dockerconfigjson'
+      else if std.objectHas(data, '.dockercfg') then
+        'kubernetes.io/dockercfg'
       else if std.objectHas(data, 'ca.crt') && std.objectHas(data, 'token') then
         'kubernetes.io/service-account-token'
       else
