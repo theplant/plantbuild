@@ -71,7 +71,6 @@ cfg {
   ):: {
     kind: 'CronJob',
     apiVersion: 'batch/v1beta1',
-
     metadata: {
       namespace: namespace,
       name: name,
@@ -92,7 +91,6 @@ cfg {
         },
         spec: {
           backoffLimit: 1,
-          activeDeadlineSeconds: 30,
           template: {
             metadata: {
               labels: {
