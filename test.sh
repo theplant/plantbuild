@@ -26,6 +26,7 @@ for c in $(cat ./test_cases.json | jq -r '.[] | @base64'); do
         jq_path=$(echo $assert | base64 --decode | jq -r '.jq_path')
         expected=$(echo $assert | base64 --decode | jq -r '.expected')
         actual=$(printf "$result" | jq -r "$jq_path")
+        expected=$(eval "printf \"$expected\"")
         if diff -B <(printf "$actual\n") <(printf "$expected\n"); then
             printf "."
         else

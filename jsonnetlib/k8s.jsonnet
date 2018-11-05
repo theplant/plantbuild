@@ -2,8 +2,11 @@ local cfg = import 'config.jsonnet';
 cfg {
   local root = self,
   local fullimage(namespace, name) = root.with_registry('%s/%s:%s' % [namespace, name, root.version]),
+  local imageWithVersionAsTag(image) = '%s:%s' % [image, root.version],
   local resolve_image(namespace, name, image) = if std.length(image) == 0 then
     fullimage(namespace, name)
+  else if std.length(std.split(image, ':')) == 1 then
+    imageWithVersionAsTag(image)
   else
     image,
   local configmapref(configmap) = if std.length(configmap) > 0 then {
