@@ -214,6 +214,7 @@ cfg {
     namespace=root.defaultNamespace,
     name,
     host='',
+    ingressTLSEnabled=false,
     path='/',
     configmap='',
     replicas=1,
@@ -253,6 +254,7 @@ cfg {
         name=name,
         port=port,
         host=host,
+        ingressTLSEnabled=ingressTLSEnabled,
         path=path,
         annotations=ingressAnnotations,
       ),
@@ -285,7 +287,7 @@ cfg {
     },
   },
 
-  single_svc_ingress(namespace=root.defaultNamespace, name, port, host='', path='/', annotations={})::
+  single_svc_ingress(namespace=root.defaultNamespace, name, port, host='', path='/', ingressTLSEnabled=false, annotations={})::
     local newhost = if std.type(host) != 'array' && std.length(host) == 0 && std.length(root.baseHost) > 0 then '%s.%s' % [name, root.baseHost] else host;
     local hosts = if std.type(host) == 'array' then host else [newhost];
     local rules = [
@@ -305,9 +307,15 @@ cfg {
       }
       for h in hosts
     ];
-    root.ingress(namespace, name, rules, annotations),
+    local tls = if !ingressTLSEnabled then [] else [
+      {
+        secretName: std.join('-', [name, 'ssl']),
+        hosts: [h for h in hosts],
+      },
+    ];
+    root.ingress(namespace, name, rules, tls, annotations),
 
-  ingress(namespace=root.defaultNamespace, name, rules, annotations={}):: {
+  ingress(namespace=root.defaultNamespace, name, rules, tls=[], annotations={}):: {
     apiVersion: 'extensions/v1beta1',
     kind: 'Ingress',
     metadata: {
@@ -320,6 +328,7 @@ cfg {
     },
     spec: {
       rules: rules,
+      tls: tls,
     },
   },
 
