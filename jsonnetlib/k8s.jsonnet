@@ -218,6 +218,7 @@ cfg {
     path='/',
     configmap='',
     replicas=1,
+    minAvailable=root.minAvailable,
     imagePullSecrets=root.imagePullSecrets,
     image='',
     port=root.port,
@@ -248,6 +249,7 @@ cfg {
         container=container,
         volumes=volumes,
       ),
+      root.pdb(name, minAvailable),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
         namespace=namespace,
@@ -419,4 +421,19 @@ cfg {
       },
     },
   },
+
+  pdb(name, minAvailable=root.minAvailable):: {
+    apiVersion: 'policy/v1beta1',
+    kind: 'PodDisruptionBudget',
+    metadata: {
+      name: name,
+    },
+    spec: {
+      minAvailable: minAvailable,
+      selector: {
+        matchLabels: { app: name },
+      },
+    },
+  },
+
 }

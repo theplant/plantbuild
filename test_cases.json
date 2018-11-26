@@ -44,7 +44,7 @@
 			},
 			{
 				"jq_path": ".items[].kind",
-				"expected": "Deployment\nService\nIngress\nDeployment\nService\nIngress\nDeployment\nConfigMap\nConfigMap\nCronJob\nCronJob\n"
+				"expected": "Deployment\nPodDisruptionBudget\nService\nIngress\nDeployment\nPodDisruptionBudget\nService\nIngress\nDeployment\nConfigMap\nConfigMap\nCronJob\nCronJob\n"
 			}
 		]
 	},
@@ -61,7 +61,7 @@
 		"show_args": "./example/k8s/tests/test_multi_hosts.jsonnet",
 		"asserts": [
 			{
-				"jq_path": ".items[2].spec.rules[].host",
+				"jq_path": ".items[3].spec.rules[].host",
 				"expected": "app1.example.theplant-dev.com\napp1-1.example.theplant-dev.com\napp1-2.example.theplant-dev.com\n"
 			}
 		]
@@ -115,15 +115,15 @@
 				"expected": "myexample2"
 			},
 			{
-				"jq_path": ".items[4].metadata.namespace",
-				"expected": "myexample2"
-			},
-			{
 				"jq_path": ".items[5].metadata.namespace",
 				"expected": "myexample2"
 			},
 			{
-				"jq_path": ".items[5].spec.rules[0].host",
+				"jq_path": ".items[6].metadata.namespace",
+				"expected": "myexample2"
+			},
+			{
+				"jq_path": ".items[6].spec.rules[0].host",
 				"expected": "dep2.dt.theplant-dev.com"
 			}
 		]
