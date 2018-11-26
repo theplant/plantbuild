@@ -11,6 +11,7 @@ assert std.length(v) > 0 : 'version is empty';
   memoryLimit: '200Mi',
   cpuLimit: '500m',
   replicas: 1,
+  minAvailable: 1,
 
   // config helper func
   local root = self,
