@@ -249,7 +249,7 @@ cfg {
         container=container,
         volumes=volumes,
       ),
-      root.pdb(name, minAvailable),
+      root.pdb(namespace, name, minAvailable),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
         namespace=namespace,
@@ -422,10 +422,11 @@ cfg {
     },
   },
 
-  pdb(name, minAvailable=root.minAvailable):: {
+  pdb(namespace=root.defaultNamespace, name, minAvailable=root.minAvailable):: {
     apiVersion: 'policy/v1beta1',
     kind: 'PodDisruptionBudget',
     metadata: {
+      namespace: namespace,
       name: name,
     },
     spec: {
