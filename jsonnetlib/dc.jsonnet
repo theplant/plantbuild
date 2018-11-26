@@ -153,7 +153,7 @@ cfg {
 
   deps:: {
     postgres: {
-      image: 'postgres:9.6.6',
+      image: 'postgres:9',
       environment: [
         'POSTGRES_USER=db',
         'POSTGRES_PASSWORD=123',
