@@ -411,8 +411,8 @@ cfg {
                   memory: memoryLimit,
                 },
                 requests: {
-                  cpu: '10m',
-                  memory: '10Mi',
+                  cpu: '200m',
+                  memory: '20Mi',
                 },
               },
             } + probe + configmapref(configmap) + envRef(envmap) + container,
