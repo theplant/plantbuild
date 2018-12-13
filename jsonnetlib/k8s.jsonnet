@@ -358,17 +358,17 @@ cfg {
         tcpSocket: {
           port: port,
         },
-        failureThreshold: 3,
-        initialDelaySeconds: 5,
+        failureThreshold: 5,
+        initialDelaySeconds: 300,
         periodSeconds: 10,
       },
       readinessProbe: {
         tcpSocket: {
           port: port,
         },
-        failureThreshold: 15,
+        failureThreshold: 60,
         initialDelaySeconds: 5,
-        periodSeconds: 10,
+        periodSeconds: 5,
       },
     },
     local vols = if std.length(volumes) > 0 then
