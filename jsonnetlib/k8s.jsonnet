@@ -358,6 +358,7 @@ cfg {
         tcpSocket: {
           port: port,
         },
+        failureThreshold: 3,
         initialDelaySeconds: 5,
         periodSeconds: 10,
       },
@@ -365,6 +366,7 @@ cfg {
         tcpSocket: {
           port: port,
         },
+        failureThreshold: 15,
         initialDelaySeconds: 5,
         periodSeconds: 10,
       },
