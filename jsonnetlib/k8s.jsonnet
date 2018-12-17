@@ -415,7 +415,7 @@ cfg {
                   memory: memoryLimit,
                 },
                 requests: {
-                  cpu: '50m',
+                  cpu: '20m',
                   memory: '20Mi',
                 },
               },
