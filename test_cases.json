@@ -149,6 +149,40 @@
 				"expected": "registry.theplant-dev.com/example/app1:$(git rev-parse HEAD|cut -c 1-7)"
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_image2url_with_hpa.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[4].spec.minReplicas",
+				"expected": 2
+			},
+			{
+				"jq_path": ".items[4].spec.maxReplicas",
+				"expected": 5
+			},
+			{
+				"jq_path": ".items[4].spec.targetCPUUtilizationPercentage",
+				"expected": 70
+			}
+		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_deployment_with_hpa.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[1].spec.minReplicas",
+				"expected": 2
+			},
+			{
+				"jq_path": ".items[1].spec.maxReplicas",
+				"expected": 5
+			},
+			{
+				"jq_path": ".items[1].spec.targetCPUUtilizationPercentage",
+				"expected": 75
+			}
+		]
 	}
 ]
 

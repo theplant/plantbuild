@@ -230,6 +230,9 @@ cfg {
     envmap={},
     container={},
     volumes=[],
+    maxReplicas=0,
+    minReplicas=3,
+    targetCPUUtilizationPercentage=75,
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -260,7 +263,9 @@ cfg {
         path=path,
         annotations=ingressAnnotations,
       ),
-    ],
+    ] + if maxReplicas > 0 then [
+      root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
+    ] else [],
   },
 
   svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port, annotations={}):: {
@@ -438,6 +443,25 @@ cfg {
       selector: {
         matchLabels: { app: name },
       },
+    },
+  },
+
+  hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage):: {
+    apiVersion: 'autoscaling/v1',
+    kind: 'HorizontalPodAutoscaler',
+    metadata: {
+      namespace: namespace,
+      name: name,
+    },
+    spec: {
+      scaleTargetRef: {
+        apiVersion: 'apps/v1beta1',
+        kind: 'Deployment',
+        name: name,
+      },
+      minReplicas: minReplicas,
+      maxReplicas: maxReplicas,
+      targetCPUUtilizationPercentage: targetCPUUtilizationPercentage,
     },
   },
 
