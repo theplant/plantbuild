@@ -145,6 +145,12 @@ case $subcommand in
                 patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_cronjob_env("'$configmap'")'
             fi
 
+            if echo $meta | jq -e -r ".labels.job"; then
+                k8sresource='job'
+                resourceName=$(echo $meta | jq -r ".labels.job")
+                patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_job_env("'$configmap'")'
+            fi
+
             patch=$(echo $patchscript | show $githash7 '-')
             echo "patching with: ""$patch"
             _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p \"$(echo $patch)\""

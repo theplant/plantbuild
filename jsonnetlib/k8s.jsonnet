@@ -42,14 +42,17 @@ cfg {
     name,
     deployment='',
     cronjob='',
+    job='',
     data,
     withoutVersion=false
   ):: {
-    assert !(std.length(deployment) == 0 && std.length(cronjob) == 0) : 'deployment or cronjob required',
+    assert !(std.length(deployment) == 0 && std.length(cronjob) == 0 && std.length(job) == 0) : 'deployment or cronjob or job required',
     local labels = if std.length(deployment) > 0 then
       { deployment: deployment }
     else if std.length(cronjob) > 0 then
       { cronjob: cronjob }
+    else if std.length(job) > 0 then
+      { job: job }
     else
       {},
     kind: 'ConfigMap',
@@ -112,6 +115,43 @@ cfg {
             } + imagePullSecretsRef(imagePullSecrets),
           },
         },
+      },
+    },
+  },
+
+  job(
+    namespace=root.defaultNamespace,
+    name,
+    configmap='',
+    image='',
+    imagePullSecrets=root.imagePullSecrets,
+    envmap={},
+    container={},
+  ):: {
+    kind: 'Job',
+    apiVersion: 'batch/v1',
+    metadata: {
+      namespace: namespace,
+      name: name,
+      labels: {
+        app: name,
+      },
+    },
+    spec: {
+      //   ttlSecondsAfterFinished: 5, // not supported yet
+      backoffLimit: 1,
+      parallelism: 1,
+      template: {
+        spec: {
+          restartPolicy: 'Never',
+          containers: [
+            {
+              name: name,
+              image: resolve_image(namespace, name, image),
+              imagePullPolicy: 'IfNotPresent',
+            } + configmapref(configmap) + envRef(envmap) + container,
+          ],
+        } + imagePullSecretsRef(imagePullSecrets),
       },
     },
   },
@@ -189,6 +229,22 @@ cfg {
     {
       op: 'replace',
       path: '/spec/jobTemplate/spec/template/spec/containers/0/envFrom',
+      value: [
+        {
+          configMapRef: {
+            name: configmap,
+          },
+        },
+      ],
+    },
+  ],
+
+  patch_job_env(
+    configmap,
+  ):: [
+    {
+      op: 'replace',
+      path: '/spec/containers/0/envFrom',
       value: [
         {
           configMapRef: {

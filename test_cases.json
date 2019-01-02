@@ -183,6 +183,15 @@
 				"expected": 75
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_job.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".spec.parallelism",
+				"expected": 1
+			}
+		]
 	}
 ]
 
