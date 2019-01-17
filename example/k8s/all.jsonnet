@@ -14,6 +14,8 @@ k8s.list([
     name='app3',
     configmap='cm-example',
     withoutProbe=true,
+    memoryRequest='40Mi',
+    cpuRequest='100m',
     cpuLimit='1000m',
     memoryLimit='1000Mi',
   ),

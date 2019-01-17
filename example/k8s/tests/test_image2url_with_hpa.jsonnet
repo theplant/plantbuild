@@ -9,6 +9,8 @@ k8s.image_to_url(
   minReplicas=2,
   maxReplicas=5,
   targetCPUUtilizationPercentage=70,
+  memoryRequest='40Mi',
+  cpuRequest='100m',
   memoryLimit='8G',
   cpuLimit='1500m',
   ingressTLSEnabled=true,

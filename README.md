@@ -123,6 +123,8 @@ local myk8s = k8s + {
   namespace: 'mynamespace',
   port: 4000,
   baseHost: 'myserver.com',
+  memoryRequest='40Mi',
+  cpuRequest='100m',
   memoryLimit: '200Mi',
   cpuLimit: '500m',
   replicas: 1,
