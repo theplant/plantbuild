@@ -280,6 +280,7 @@ cfg {
     port=root.port,
     probes={},
     targetPort=root.port,
+    neverColocated=false,
     memoryRequest=root.memoryRequest,
     cpuRequest=root.cpuRequest,
     memoryLimit=root.memoryLimit,
@@ -304,6 +305,7 @@ cfg {
         configmap=configmap,
         replicas=replicas,
         imagePullSecrets=imagePullSecrets,
+        neverColocated=neverColocated,
         memoryRequest=memoryRequest,
         cpuRequest=cpuRequest,
         memoryLimit=memoryLimit,
@@ -410,6 +412,7 @@ cfg {
     port=root.port,
     probes={},
     withoutProbe=false,
+    neverColocated=false,
     memoryRequest=root.memoryRequest,
     cpuRequest=root.cpuRequest,
     memoryLimit=root.memoryLimit,
@@ -444,6 +447,32 @@ cfg {
       {
         volumes: volumes,
       } else {},
+    local colocatedSelector = {
+      labelSelector: {
+        matchExpressions: [{
+          key: 'app',
+          operator: 'In',
+          values: [name],
+        }],
+      },
+      topologyKey: 'kubernetes.io/hostname',
+    },
+    local affinity = if neverColocated then {
+      affinity: {
+        podAntiAffinity: {
+          requiredDuringSchedulingIgnoredDuringExecution: [colocatedSelector],
+        },
+      },
+    } else {
+      affinity: {
+        podAntiAffinity: {
+          preferredDuringSchedulingIgnoredDuringExecution: [{
+            weight: 100,
+            podAffinityTerm: colocatedSelector,
+          }],
+        },
+      },
+    },
     apiVersion: 'extensions/v1beta1',
     kind: 'Deployment',
     metadata: {
@@ -488,7 +517,7 @@ cfg {
               },
             } + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
-        } + vols + imagePullSecretsRef(imagePullSecrets),
+        } + affinity + vols + imagePullSecretsRef(imagePullSecrets),
       },
     },
   },
