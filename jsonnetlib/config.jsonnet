@@ -12,6 +12,7 @@ assert std.length(v) > 0 : 'version is empty';
   cpuRequest: '20m',
   memoryLimit: '200Mi',
   cpuLimit: '500m',
+  maxSurge: 1,
   replicas: 1,
   minAvailable: 1,
 

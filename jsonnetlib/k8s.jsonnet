@@ -285,6 +285,7 @@ cfg {
     cpuRequest=root.cpuRequest,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
+    maxSurge=root.maxSurge,
     ingressAnnotations={},
     envmap={},
     container={},
@@ -310,6 +311,7 @@ cfg {
         cpuRequest=cpuRequest,
         memoryLimit=memoryLimit,
         cpuLimit=cpuLimit,
+        maxSurge=maxSurge,
         envmap=envmap,
         container=container,
         volumes=volumes,
@@ -417,6 +419,7 @@ cfg {
     cpuRequest=root.cpuRequest,
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
+    maxSurge=root.maxSurge,
     container={},
     volumes=[],
   ):: {
@@ -484,7 +487,7 @@ cfg {
       replicas: replicas,
       strategy: {
         rollingUpdate: {
-          maxSurge: 1,
+          maxSurge: maxSurge,
           maxUnavailable: 0,
         },
         type: 'RollingUpdate',
