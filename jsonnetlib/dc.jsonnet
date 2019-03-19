@@ -5,8 +5,13 @@ cfg {
     local reg_ns = std.split(pkg, '/')[1];
     root.with_registry('%s/%s:%s' % [reg_ns, app, version])
   ,
+  local get_dep(name, customized_deps) =
+    if std.objectHas(customized_deps, name) then
+      customized_deps[name]
+    else
+      root.deps[name],
 
-  go_apps_test(pkg, apps, deps=[],):: {
+  go_apps_test(pkg, apps, deps=[], customized_deps={},):: {
     local to_obj(m) =
       local projectRoot = '/go/src/github.com/%s' % pkg;
       local name = if std.type(m) == 'object' then
@@ -40,12 +45,12 @@ cfg {
       }
       for m in apps
     } + {
-      [name]: root.deps[name]
-      for name in deps
+      [name]: get_dep(name, customized_deps)
+      for name in (deps)
     },
   },
 
-  go_test(pkg, deps=[]):: {
+  go_test(pkg, deps=[], customized_deps={},):: {
     local projectRoot = '/go/src/github.com/%s' % pkg,
     local image = root.with_registry('%s-dep:%s' % [pkg, root.version]),
     version: '3',
@@ -60,7 +65,7 @@ cfg {
         depends_on: deps,
       },
     } + {
-      [name]: root.deps[name]
+      [name]: get_dep(name, customized_deps)
       for name in deps
     },
   },

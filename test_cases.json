@@ -18,6 +18,15 @@
 		]
 	},
 	{
+		"show_args": "./example/test_customized_deps.jsonnet -v 1.0.0",
+		"asserts": [
+			{
+				"jq_path": ".services.elasticsearch2.environment[0]",
+				"expected": "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+			}
+		]
+	},
+	{
 		"show_args": "./example/test.jsonnet -v 1.0.0",
 		"asserts": [
 			{
