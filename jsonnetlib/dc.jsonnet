@@ -21,7 +21,7 @@ cfg {
 
       local default = {
         mount: projectRoot,
-        entrypoint: 'go test -v -p=1 ./%s/...' % name,
+        entrypoint: 'go get ./%s/... && go test -v -p=1 ./%s/...' % [name, name],
         test_env: './%s/test.env' % name,
       };
 
@@ -60,7 +60,7 @@ cfg {
         volumes: [
           '.:%s' % projectRoot,
         ],
-        entrypoint: 'go test -v -p=1 ./...',
+        entrypoint: 'go get ./... && go test -v -p=1 ./...',
         env_file: './test.env',
         depends_on: deps,
       },
