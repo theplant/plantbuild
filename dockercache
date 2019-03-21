@@ -16,8 +16,6 @@ function cache_images() {
       printf "Saving image $( echo ${image_name} ) to $( echo $cached_images_path/$image_filename.tar )\n"
       docker save -o $cached_images_path/$image_filename.tar $(echo ${image_name})
     done
-
-    ! [ $? -eq 0 ] && exit 1
   else
     echo "No images found."
   fi
