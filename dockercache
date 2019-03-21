@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+
+function cache_images() {
+  images_to_cache=$( docker images --format='{{.Repository}}:{{.Tag}},{{.ID}},{{.Size}}' | grep -v '<none>' | sort | uniq )
+  echo "Caching the following images"
+  echo "$images_to_cache"
+  if [ -n "$images_to_cache" ]; then
+    rm -rf $cached_images_path
+    mkdir $cached_images_path
+    i=0
+    for image_line in ${images_to_cache[@]}; do
+      i=$(expr $i + 1)
+      image_filename=$( echo "image_$i" )
+      image_name=$( echo "$image_line" | cut -d , -f 1 )
+
+      printf "Saving image $( echo ${image_name} ) to $( echo $cached_images_path/$image_filename.tar )\n"
+      docker save -o $cached_images_path/$image_filename.tar $(echo ${image_name})
+    done
+
+    ! [ $? -eq 0 ] && exit 1
+  else
+    echo "No images found."
+  fi
+}
+
+function restore_images() {
+
+  if [ -d $cached_images_path ] && [ -e $cached_image_metadata_path ]; then
+    echo "Restoring images ..."
+    cached_images=$(ls $cached_images_path);
+
+    for image_archive in ${cached_images[@]}; do
+      docker load -i $cached_images_path/$image_archive
+    done
+
+    echo "Images restored."
+  else
+   echo "No image backup found from $cached_images_path"
+  fi
+}
+
+function docker-cache() {
+  echo "Running $CMD for $DIR"
+  usage="Usage: cat docker-cache | CMD=restore DIR=mydir bash"
+  if [ -z $CMD ]; then
+    echo "$usage"
+    exit 1
+  fi
+
+  if [ -z $DIR ]; then
+    echo "$usage"
+    exit 1
+  fi
+
+  destination=$DIR
+  cached_images_path="$destination/docker-images"
+
+  case "$CMD" in
+    "snapshot" )
+      cache_images
+      ;;
+    "restore" )
+      restore_images
+      ;;
+    * )
+      echo "'$CMD' action unknown"
+      echo "$usage"
+      ;;
+  esac
+}
+
+docker-cache "$@"
