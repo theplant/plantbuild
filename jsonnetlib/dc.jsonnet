@@ -24,7 +24,7 @@ cfg {
         command: [
           'sh',
           '-c',
-          'go get ./%s/... && go test -v -p=1 ./%s/...' % [name, name],
+          'go get -t ./%s/... && go test -v -p=1 ./%s/...' % [name, name],
         ],
         test_env: './%s/test.env' % name,
       };
@@ -67,7 +67,7 @@ cfg {
         command: [
           'sh',
           '-c',
-          'go get ./... && go test -v -p=1 ./...',
+          'go get -t ./... && go test -v -p=1 ./...',
         ],
         env_file: './test.env',
         depends_on: deps,

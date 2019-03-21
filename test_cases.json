@@ -31,7 +31,7 @@
 		"asserts": [
 			{
 				"jq_path": ".services.accounting_test.command[2]",
-				"expected": "go get ./accounting/... && go test -v -p=1 ./accounting/..."
+				"expected": "go get -t ./accounting/... && go test -v -p=1 ./accounting/..."
 			}
 		]
 	},
