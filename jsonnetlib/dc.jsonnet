@@ -21,7 +21,11 @@ cfg {
 
       local default = {
         mount: projectRoot,
-        entrypoint: 'go get ./%s/... && go test -v -p=1 ./%s/...' % [name, name],
+        command: [
+          'sh',
+          '-c',
+          'go get ./%s/... && go test -v -p=1 ./%s/...' % [name, name],
+        ],
         test_env: './%s/test.env' % name,
       };
 
@@ -39,7 +43,7 @@ cfg {
         volumes: [
           '.:%s' % to_obj(m).mount,
         ],
-        entrypoint: to_obj(m).entrypoint,
+        command: to_obj(m).command,
         env_file: to_obj(m).test_env,
         depends_on: deps,
       }
@@ -60,7 +64,11 @@ cfg {
         volumes: [
           '.:%s' % projectRoot,
         ],
-        entrypoint: 'go get ./... && go test -v -p=1 ./...',
+        command: [
+          'sh',
+          '-c',
+          'go get ./... && go test -v -p=1 ./...',
+        ],
         env_file: './test.env',
         depends_on: deps,
       },
