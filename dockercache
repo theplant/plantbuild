@@ -34,6 +34,7 @@ function restore_images() {
     echo "Images restored."
   else
    echo "No image backup found from $cached_images_path"
+   exit 1
   fi
 }
 
