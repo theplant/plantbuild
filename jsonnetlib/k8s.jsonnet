@@ -293,6 +293,7 @@ cfg {
     maxReplicas=0,
     minReplicas=3,
     targetCPUUtilizationPercentage=75,
+    podSpec={},
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -315,6 +316,7 @@ cfg {
         envmap=envmap,
         container=container,
         volumes=volumes,
+        podSpec=podSpec,
       ),
       root.pdb(namespace, name, minAvailable),
       root.svc(namespace, name, port, targetPort),
@@ -422,6 +424,7 @@ cfg {
     maxSurge=root.maxSurge,
     container={},
     volumes=[],
+    podSpec={},
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {}
@@ -520,7 +523,7 @@ cfg {
               },
             } + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
-        } + affinity + vols + imagePullSecretsRef(imagePullSecrets),
+        } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
       },
     },
   },

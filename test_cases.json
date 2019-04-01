@@ -201,6 +201,23 @@
 				"expected": 1
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_pod_spec.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.serviceAccountName",
+				"expected": "account1"
+			},
+			{
+				"jq_path": ".items[0].spec.template.spec.restartPolicy",
+				"expected": "Always"
+			},
+			{
+				"jq_path": ".items[4].spec.template.spec.serviceAccountName",
+				"expected": "account2"
+			}
+		]
 	}
 ]
 
