@@ -178,7 +178,7 @@ cfg {
     },
 
     elasticsearch: {
-      image: 'registry.theplant-dev.com/ec/elasticsearch:5.5.0.2',
+      image: 'theplant/elasticsearch:5.5.0.2',
       environment: [
         'ES_JAVA_OPTS=-Xms1g -Xmx5g',
       ],
