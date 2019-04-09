@@ -218,6 +218,18 @@
 				"expected": "account2"
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/tests/test_container_lifecycle.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".items[0].spec.template.spec.containers[0].lifecycle.preStop.exec.command[0]",
+				"expected": "/bin/sh"
+			},
+			{
+				"jq_path": ".items[4].spec.template.spec.containers[0].lifecycle.preStop.exec.command[2]",
+				"expected": "kill -15 -1"
+			}
+		]
 	}
 ]
-
