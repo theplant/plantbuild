@@ -320,7 +320,6 @@ cfg {
         volumes=volumes,
         podSpec=podSpec,
       ),
-      root.pdb(namespace, name, minAvailable),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
         namespace=namespace,
@@ -333,6 +332,8 @@ cfg {
       ),
     ] + if maxReplicas > 0 then [
       root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
+    ] else [] + if replicas > 1 then [
+      root.pdb(namespace, name, minAvailable),
     ] else [],
   },
 
