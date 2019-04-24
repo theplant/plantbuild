@@ -87,8 +87,8 @@ cfg {
     spec: {
       schedule: schedule,
       concurrencyPolicy: 'Allow',
-      failedJobsHistoryLimit: 10,
-      successfulJobsHistoryLimit: 5,
+      failedJobsHistoryLimit: root.failedJobsHistoryLimit,
+      successfulJobsHistoryLimit: root.successfulJobsHistoryLimit,
       jobTemplate: {
         metadata: {
           labels: {
