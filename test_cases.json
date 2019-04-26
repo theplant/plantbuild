@@ -4,7 +4,7 @@
 		"asserts": [
 			{
 				"jq_path": ".services.build_image_app1.image",
-				"expected": "registry.theplant-dev.com/example/app1:1.0.0"
+				"expected": "registry.example.com/example/app1:1.0.0"
 			}
 		]
 	},
@@ -40,7 +40,7 @@
 		"asserts": [
 			{
 				"jq_path": ".items[0].spec.template.spec.containers[0].image",
-				"expected": "registry.theplant-dev.com/example/app1:1.0.0"
+				"expected": "registry.example.com/example/app1:1.0.0"
 			}
 		]
 	},
@@ -49,7 +49,7 @@
 		"asserts": [
 			{
 				"jq_path": ".items[0].spec.template.spec.containers[0].image",
-				"expected": "registry.theplant-dev.com/example/app1:2.1.0"
+				"expected": "registry.example.com/example/app1:2.1.0"
 			},
 			{
 				"jq_path": ".items[].kind",
@@ -155,7 +155,7 @@
 		"asserts": [
 			{
 				"jq_path": ".items[0].spec.template.spec.containers[0].image",
-				"expected": "registry.theplant-dev.com/example/app1:$(git rev-parse HEAD|cut -c 1-7)"
+				"expected": "registry.example.com/example/app1:$(git rev-parse HEAD|cut -c 1-7)"
 			}
 		]
 	},

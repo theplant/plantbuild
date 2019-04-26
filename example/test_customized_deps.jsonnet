@@ -14,7 +14,7 @@ local otherdeps = {
     environment: [
       'ES_JAVA_OPTS=-Xms1g -Xmx1g',
     ],
-    image: 'registry.theplant-dev.com/ec/elasticsearch:5.5.0.2',
+    image: 'registry.example.com/ec/elasticsearch:5.5.0.2',
     ports: [
       '9251:9200',
       '9351:9300',
