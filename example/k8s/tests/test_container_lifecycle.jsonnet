@@ -3,7 +3,7 @@ k8s.list([
   k8s.image_to_url(
     name='app1',
     image='nginx:123',
-    lifecycle={
+    container={
       lifecycle: {
         preStop: {
           exec: {
@@ -20,7 +20,7 @@ k8s.list([
   k8s.deployment(
     name='app2',
     image='nginx:123',
-    lifecycle={
+    container={
       lifecycle: {
         preStop: {
           exec: {
