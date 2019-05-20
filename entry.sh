@@ -1,1 +1,3 @@
-/jsonnet -J /jsonnetlib -V VERSION=$VERSION $RUN
+#!/usr/bin/env sh
+
+jsonnet -J /jsonnetlib -V VERSION="$VERSION" "$RUN"
