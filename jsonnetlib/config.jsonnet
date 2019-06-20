@@ -17,6 +17,7 @@ assert std.length(v) > 0 : 'version is empty';
   minAvailable: 1,
   failedJobsHistoryLimit: 2,
   successfulJobsHistoryLimit: 1,
+  projectRoot: '/home/prow/go/src/github.com',
 
   // config helper func
   local root = self,

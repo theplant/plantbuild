@@ -13,7 +13,7 @@ cfg {
 
   go_apps_test(pkg, apps, deps=[], customized_deps={},):: {
     local to_obj(m) =
-      local projectRoot = '/go/src/github.com/%s' % pkg;
+      local projectRoot = '%s/%s' % [root.projectRoot, pkg];
       local name = if std.type(m) == 'object' then
         m.name
       else
@@ -55,7 +55,7 @@ cfg {
   },
 
   go_test(pkg, deps=[], customized_deps={},):: {
-    local projectRoot = '/go/src/github.com/%s' % pkg,
+    local projectRoot = '%s/%s' % [root.projectRoot, pkg],
     local image = root.with_registry('%s-dep:%s' % [pkg, root.version]),
     version: '3',
     services: {
@@ -104,7 +104,7 @@ cfg {
           dockerfile: './Dep.Dockerfile',
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
-            'WORKDIR=/go/src/github.com/%s' % pkg,
+            'WORKDIR=%s/%s' % [root.projectRoot, pkg],
           ],
         },
         image: if for_multiple_apps then image_path(pkg, 'dep', root.version) else root.with_registry('%s-dep:%s' % [pkg, root.version]),
