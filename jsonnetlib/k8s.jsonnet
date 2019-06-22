@@ -294,6 +294,7 @@ cfg {
     minReplicas=3,
     targetCPUUtilizationPercentage=75,
     podSpec={},
+    nodeSelector={},
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -317,6 +318,7 @@ cfg {
         container=container,
         volumes=volumes,
         podSpec=podSpec,
+        nodeSelector=nodeSelector,
       ),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
@@ -426,6 +428,7 @@ cfg {
     container={},
     volumes=[],
     podSpec={},
+    nodeSelector={},
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {}
@@ -524,7 +527,7 @@ cfg {
               },
             } + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
-        } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
+        } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec + nodeSelector,
       },
     },
   },
