@@ -95,6 +95,9 @@ cfg {
     },
   },
 
+  // Example:
+  //   given:  pkg = 'theplant/ec', -v latest
+  //   expect: image = $dockerRegistry/ec/dep:latest
   go_build_dep_image(pkg, dockerfile='./Dep.Dockerfile', for_multiple_apps=true):: {
     version: '3',
     services: {
@@ -104,6 +107,7 @@ cfg {
           dockerfile: dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
+            'NPM_TOKEN=$NPM_TOKEN',
             'WORKDIR=%s/%s' % [root.projectRoot, pkg],
           ],
         },
