@@ -95,13 +95,13 @@ cfg {
     },
   },
 
-  go_build_dep_image(pkg, for_multiple_apps=true):: {
+  go_build_dep_image(pkg, dockerfile='./Dep.Dockerfile', for_multiple_apps=true):: {
     version: '3',
     services: {
       build_image: {
         build: {
           context: '.',
-          dockerfile: './Dep.Dockerfile',
+          dockerfile: dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
             'WORKDIR=%s/%s' % [root.projectRoot, pkg],
