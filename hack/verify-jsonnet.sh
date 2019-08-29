@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if ! find . -name '*.jsonnet' -exec jsonnet fmt --test '{}' +
+if ! find . -name '*.jsonnet' -exec jsonnetfmt --test '{}' +
 then
   echo "ERROR: found unformatted jsonnet files. Fix with hack/update-jsonnet.sh"
   exit 1

@@ -2,7 +2,7 @@
 
 if which jsonnet; then
     printf "Formatting code"
-    if find . -name '*.jsonnet' | xargs jsonnet fmt -i; then
+    if find . -name '*.jsonnet' | xargs jsonnetfmt -i; then
         echo ", Done"
     fi
 fi
