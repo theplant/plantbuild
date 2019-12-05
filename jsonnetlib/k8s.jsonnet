@@ -74,6 +74,7 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     envmap={},
     container={},
+    podSpec=root.podSpec,
   ):: {
     kind: 'CronJob',
     apiVersion: 'batch/v1beta1',
@@ -112,7 +113,7 @@ cfg {
                   imagePullPolicy: 'IfNotPresent',
                 } + configmapref(configmap) + envRef(envmap) + container,
               ],
-            } + imagePullSecretsRef(imagePullSecrets),
+            } + imagePullSecretsRef(imagePullSecrets) + podSpec,
           },
         },
       },
@@ -127,6 +128,7 @@ cfg {
     imagePullSecrets=root.imagePullSecrets,
     envmap={},
     container={},
+    podSpec=root.podSpec,
   ):: {
     kind: 'Job',
     apiVersion: 'batch/v1',
@@ -151,7 +153,7 @@ cfg {
               imagePullPolicy: 'IfNotPresent',
             } + configmapref(configmap) + envRef(envmap) + container,
           ],
-        } + imagePullSecretsRef(imagePullSecrets),
+        } + imagePullSecretsRef(imagePullSecrets) + podSpec,
       },
     },
   },
