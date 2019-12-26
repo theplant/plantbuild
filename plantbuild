@@ -132,7 +132,6 @@ case $subcommand in
         ;;
     k8s_set_images)
         show $version $filename | jq -r '.commands[]' | while read i; do
-            echo "kubectl $i"
             _k "$i"
         done
         ;;
