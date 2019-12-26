@@ -206,7 +206,7 @@ cfg {
     else
       [items],
 
-    commands: ['-n %s --record set image %s/%s %s=%s' % [namespace, it.type, it.name, it.name, resolve_image(namespace, it.name, it.image)] for it in make_items(images)],
+    commands: ['-n %s set image %s/%s %s=%s --record' % [namespace, it.type, it.name, it.name, resolve_image(namespace, it.name, it.image)] for it in make_items(images)],
   },
 
   patch_deployment_image(
