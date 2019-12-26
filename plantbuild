@@ -12,7 +12,7 @@ dcservice=
 
 buildversion=
 
-usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
+usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_set_images/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
 while getopts "v:a:b:" opt; do
   case $opt in
@@ -129,6 +129,12 @@ case $subcommand in
         else
             exit 1
         fi
+        ;;
+    k8s_set_images)
+        show $version $filename | jq -r '.commands[]' | while read i; do
+            echo "kubectl $i"
+            _k "$i"
+        done
         ;;
     k8s_cm_patch)
         if k8scommit; then

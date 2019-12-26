@@ -197,6 +197,18 @@ cfg {
     },
   },
 
+  set_images(
+    namespace=root.defaultNamespace,
+    images
+  ):: {
+    local make_items(items) = if std.type(items) == 'array' then
+      items
+    else
+      [items],
+
+    commands: ['-n %s --record set image %s/%s %s=%s' % [namespace, it.type, it.name, it.name, resolve_image(namespace, it.name, it.image)] for it in make_items(images)],
+  },
+
   patch_deployment_image(
     namespace=root.defaultNamespace,
     name,

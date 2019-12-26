@@ -1,5 +1,14 @@
 [
 	{
+		"show_args": "./example/k8s/tests/test_set_images.jsonnet -v 1.2.3",
+		"asserts": [
+			{
+				"jq_path": ".commands[0]",
+				"expected": "-n demo-mcd-services --record set image deployment/mop-catalogue-api mop-catalogue-api=123055475123.dkr.ecr.ap-northeast-1.amazonaws.com/mcd-services/catalogue-api:1.2.3"
+			}
+		]
+	},
+	{
 		"show_args": "./example/build.jsonnet -v 1.0.0",
 		"asserts": [
 			{
