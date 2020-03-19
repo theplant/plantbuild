@@ -494,7 +494,7 @@ cfg {
         },
       },
     },
-    apiVersion: 'extensions/v1beta1',
+    apiVersion: 'apps/v1',
     kind: 'Deployment',
     metadata: {
       namespace: namespace,
@@ -567,7 +567,7 @@ cfg {
     },
     spec: {
       scaleTargetRef: {
-        apiVersion: 'apps/v1beta1',
+        apiVersion: 'apps/v1',
         kind: 'Deployment',
         name: name,
       },
