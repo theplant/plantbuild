@@ -510,6 +510,9 @@ cfg {
         },
         type: 'RollingUpdate',
       },
+      selector: {
+        matchLabels: labels,
+      },
       template: {
         metadata: {
           labels: labels,
