@@ -304,6 +304,7 @@ cfg {
     envmap={},
     container={},
     volumes=[],
+    volumeMounts=[],
     maxReplicas=0,
     minReplicas=3,
     targetCPUUtilizationPercentage=75,
@@ -330,6 +331,7 @@ cfg {
         envmap=envmap,
         container=container,
         volumes=volumes,
+        volumeMounts=volumeMounts,
         podSpec=podSpec,
       ),
       root.svc(namespace, name, port, targetPort),
@@ -439,6 +441,7 @@ cfg {
     maxSurge=root.maxSurge,
     container={},
     volumes=[],
+    volumeMounts=[],
     podSpec=root.podSpec,
   ):: {
     local labels = { app: name },
@@ -467,6 +470,10 @@ cfg {
     local vols = if std.length(volumes) > 0 then
       {
         volumes: volumes,
+      } else {},
+    local volMounts = if std.length(volumeMounts) > 0 then
+      {
+        volumeMounts: volumeMounts,
       } else {},
     local colocatedSelector = {
       labelSelector: {
@@ -539,7 +546,7 @@ cfg {
                   memory: memoryRequest,
                 },
               },
-            } + probe + configmapref(configmap) + envRef(envmap) + container,
+            } + volMounts + probe + configmapref(configmap) + envRef(envmap) + container,
           ],
         } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
       },
