@@ -137,6 +137,7 @@ cfg {
       name: name,
       labels: {
         app: name,
+        job: name,
       },
     },
     spec: {
