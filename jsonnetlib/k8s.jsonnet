@@ -83,6 +83,7 @@ cfg {
       name: name,
       labels: {
         app: name,
+        cronjob: name,
       },
     },
     spec: {
