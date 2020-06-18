@@ -15,5 +15,16 @@ k8s.list([
     envmap={
       name1: 'value1',
     },
+    env=[
+      {
+        name: 'secret-env',
+        valueFrom: {
+          secretKeyRef: {
+            name: 'name',
+            key: 'key',
+          },
+        },
+      },
+    ],
   ),
 ])

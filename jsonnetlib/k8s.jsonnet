@@ -26,7 +26,7 @@ cfg {
         },
       ],
     } else {},
-  local envRef(envmap) = if std.length(std.objectFields(envmap)) > 0 then
+  local envRef(envmap, env) = if std.length(std.objectFields(envmap)) > 0 then
     {
       env: [
         {
@@ -34,8 +34,8 @@ cfg {
           value: envmap[n],
         }
         for n in std.objectFields(envmap)
-      ],
-    } else {},
+      ] + env,
+    } else { env: env },
 
   configmap(
     namespace=root.defaultNamespace,
@@ -73,6 +73,7 @@ cfg {
     image='',
     imagePullSecrets=root.imagePullSecrets,
     envmap={},
+    env=[],
     container={},
     podSpec=root.podSpec,
   ):: {
@@ -112,7 +113,7 @@ cfg {
                   name: name,
                   image: resolve_image(namespace, name, image),
                   imagePullPolicy: 'IfNotPresent',
-                } + configmapref(configmap) + envRef(envmap) + container,
+                } + configmapref(configmap) + envRef(envmap, env) + container,
               ],
             } + imagePullSecretsRef(imagePullSecrets) + podSpec,
           },
@@ -128,6 +129,7 @@ cfg {
     image='',
     imagePullSecrets=root.imagePullSecrets,
     envmap={},
+    env=[],
     container={},
     podSpec=root.podSpec,
   ):: {
@@ -153,7 +155,7 @@ cfg {
               name: name,
               image: resolve_image(namespace, name, image),
               imagePullPolicy: 'IfNotPresent',
-            } + configmapref(configmap) + envRef(envmap) + container,
+            } + configmapref(configmap) + envRef(envmap, env) + container,
           ],
         } + imagePullSecretsRef(imagePullSecrets) + podSpec,
       },
@@ -304,6 +306,7 @@ cfg {
     maxSurge=root.maxSurge,
     ingressAnnotations={},
     envmap={},
+    env=[],
     container={},
     volumes=[],
     maxReplicas=0,
@@ -330,6 +333,7 @@ cfg {
         cpuLimit=cpuLimit,
         maxSurge=maxSurge,
         envmap=envmap,
+        env=env,
         container=container,
         volumes=volumes,
         podSpec=podSpec,
@@ -427,6 +431,7 @@ cfg {
     name,
     configmap='',
     envmap={},
+    env=[],
     replicas=root.replicas,
     imagePullSecrets=root.imagePullSecrets,
     image='',
@@ -541,7 +546,7 @@ cfg {
                   memory: memoryRequest,
                 },
               },
-            } + probe + configmapref(configmap) + envRef(envmap) + container,
+            } + probe + configmapref(configmap) + envRef(envmap, env) + container,
           ],
         } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
       },
