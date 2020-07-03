@@ -11,10 +11,11 @@ app=
 dcservice=
 
 buildversion=
+dryrun="none"
 
 usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_set_images/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
-while getopts "v:a:b:" opt; do
+while getopts "v:a:b:d:" opt; do
   case $opt in
     v )
         version=$OPTARG
@@ -27,6 +28,9 @@ while getopts "v:a:b:" opt; do
       ;;
     b )
         buildversion=":$OPTARG"
+      ;;
+    d )
+        dryrun=$OPTARG
       ;;
     \? )
         echo "$usage"
@@ -163,7 +167,7 @@ case $subcommand in
         ;;
     k8s_apply)
         content=$(show $version $filename)
-        _k "apply --record -f -" "$content"
+        _k "apply --record -f - --dry-run=$dryrun" "$content"
         ;;
     * )
         echo "$usage"
