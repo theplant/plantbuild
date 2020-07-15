@@ -12,10 +12,11 @@ dcservice=
 
 buildversion=
 dryrun="none"
+push_to_latest_tag=true
 
 usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_set_images/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
-while getopts "v:a:b:d:" opt; do
+while getopts "v:a:b:d:l:" opt; do
   case $opt in
     v )
         version=$OPTARG
@@ -31,6 +32,9 @@ while getopts "v:a:b:d:" opt; do
       ;;
     d )
         dryrun=$OPTARG
+      ;;
+    l )
+        push_to_latest_tag=$OPTARG
       ;;
     \? )
         echo "$usage"
@@ -111,15 +115,19 @@ case $subcommand in
         docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - run "$app"_test
         ;;
     build)
-        build_image "latest" && \
         build_image $version && \
+        if [ "$push_to_latest_tag" == true ] ; then
+            build_image "latest"
+        fi
         if ! [ -z $tag_version ]; then
             build_image $tag_version
         fi
         ;;
     push)
-        push_image "latest" && \
         push_image $version && \
+        if [ "$push_to_latest_tag" == true ] ; then
+            push_image "latest"
+        fi
         if ! [ -z $tag_version ]; then
             push_image $tag_version
         fi
