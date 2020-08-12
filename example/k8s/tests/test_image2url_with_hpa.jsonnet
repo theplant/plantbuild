@@ -6,6 +6,7 @@ k8s.image_to_url(
   host='demo.example.theplant-dev.com',
   path='/',
   configmap='cm-app1-latest',
+  replicas=2,
   minReplicas=2,
   maxReplicas=5,
   targetCPUUtilizationPercentage=70,

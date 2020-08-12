@@ -309,8 +309,8 @@ cfg {
     env=[],
     container={},
     volumes=[],
-    maxReplicas=0,
-    minReplicas=3,
+    minReplicas=2,
+    maxReplicas=3,
     targetCPUUtilizationPercentage=75,
     podSpec=root.podSpec,
   ):: {
@@ -348,7 +348,7 @@ cfg {
         path=path,
         annotations=ingressAnnotations,
       ),
-    ] + if maxReplicas > 0 then [
+    ] + if replicas > 1 && maxReplicas > 1 then [
       root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
     ] else [] + if replicas > 1 then [
       root.pdb(namespace, name, minAvailable),
