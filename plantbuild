@@ -43,7 +43,7 @@ while getopts "v:a:b:d:l:" opt; do
   esac
 done
 
-# jsonnetfile="$(pwd)/$jsonnetfile"
+
 if [ -z "$jsonnetfile" ]; then
     echo "$usage"
     exit 1
@@ -64,14 +64,15 @@ tag_version=$(git describe --tags --exact-match 2>/dev/null)
 dir=$(dirname "$jsonnetfile")
 filename=$(basename "$jsonnetfile")
 
-if test -z "$KUBECTL_BASH"; then
+if [ -z "$KUBECTL_BASH" ]; then
     KUBECTL_BASH="/bin/bash"
 fi
 dockerimage='theplant/plantbuild'
+
 # functions
 
 push_image() {
-    build_image "$1" && \
+    build_image "$1"
     docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push "$dcservice"
 }
 
@@ -81,14 +82,14 @@ build_image() {
 
 show() {
     local source=/src/$2
-    if test "$2" == '-'; then
+    if [ "$2" = '-' ]; then
         source='-'
     fi
     docker run -i --rm -e RUN=$source -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion"
 }
 
 _k() {
-    if test -z "$2"; then
+    if [ -z "$2" ]; then
         echo "kubectl $1"
         echo "kubectl $1" | $KUBECTL_BASH
     else
@@ -114,8 +115,8 @@ case $subcommand in
         docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - run "$app"_test
         ;;
     build)
-        build_image "$version" && \
-        if [ "$push_to_latest_tag" == true ] ; then
+        build_image "$version"
+        if [ "$push_to_latest_tag" = true ] ; then
             build_image "latest"
         fi
         if [ -n "$tag_version" ]; then
@@ -123,8 +124,8 @@ case $subcommand in
         fi
         ;;
     push)
-        push_image "$version" && \
-        if [ "$push_to_latest_tag" == true ] ; then
+        push_image "$version"
+        if [ "$push_to_latest_tag" = true ] ; then
             push_image "latest"
         fi
         if [ -n "$tag_version" ]; then
