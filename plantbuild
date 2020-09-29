@@ -23,7 +23,7 @@ while getopts "v:a:b:d:l:" opt; do
       ;;
     a )
         app=$OPTARG
-        if ! [ -z $app ]; then
+        if [ -n "$app" ]; then
             dcservice=build_image_$OPTARG
         fi
       ;;
@@ -44,25 +44,25 @@ while getopts "v:a:b:d:l:" opt; do
 done
 
 # jsonnetfile="$(pwd)/$jsonnetfile"
-if [ -z $jsonnetfile ]; then
+if [ -z "$jsonnetfile" ]; then
     echo "$usage"
     exit 1
 fi
 
-if ! [ -e $jsonnetfile ]; then
+if ! [ -e "$jsonnetfile" ]; then
     echo "$jsonnetfile not exists"
     exit 1
 fi
 
 githash7=$(git rev-parse HEAD|cut -c 1-7)
-if [ -z $version ]; then
+if [ -z "$version" ]; then
     version=$githash7
 fi
 
 tag_version=$(git describe --tags --exact-match 2>/dev/null)
 
-dir=`dirname $jsonnetfile`
-filename=`basename $jsonnetfile`
+dir=$(dirname "$jsonnetfile")
+filename=$(basename "$jsonnetfile")
 
 if test -z "$KUBECTL_BASH"; then
     KUBECTL_BASH="/bin/bash"
@@ -71,20 +71,20 @@ dockerimage='theplant/plantbuild'
 # functions
 
 push_image() {
-    build_image $1 && \
-    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - push $dcservice
+    build_image "$1" && \
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push "$dcservice"
 }
 
 build_image() {
-    docker run -i --rm -e RUN=/src/$filename -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - build $dcservice
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build "$dcservice"
 }
 
 show() {
     local source=/src/$2
-    if test $2 == '-'; then
+    if test "$2" == '-'; then
         source='-'
     fi
-    docker run -i --rm -e RUN=$source -e VERSION=$1 -v `pwd`/$dir:/src $dockerimage$buildversion
+    docker run -i --rm -e RUN=$source -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion"
 }
 
 _k() {
@@ -93,18 +93,17 @@ _k() {
         echo "kubectl $1" | $KUBECTL_BASH
     else
         content=$(printf "%q" "$2")
-        # echo "echo $content | kubectl $1"
         echo "echo $content | kubectl $1" | $KUBECTL_BASH
     fi
 }
 
 k8scommit() {
-    content=$(show 'latest' $filename)
+    content=$(show 'latest' "$filename")
     if _k "apply -f -" "$content" | grep " unchanged"; then
         echo "latest not changed, so won't create new versions"
         return 1
     else
-        content=$(show $githash7 $filename)
+        content=$(show "$githash7" "$filename")
         _k "apply -f -" "$content"
         return 0
     fi
@@ -112,28 +111,28 @@ k8scommit() {
 
 case $subcommand in
     run)
-        docker run --rm -e RUN=/src/$filename -e VERSION=$version -v `pwd`/$dir:/src $dockerimage$buildversion | docker-compose -f - run "$app"_test
+        docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - run "$app"_test
         ;;
     build)
-        build_image $version && \
+        build_image "$version" && \
         if [ "$push_to_latest_tag" == true ] ; then
             build_image "latest"
         fi
-        if ! [ -z $tag_version ]; then
-            build_image $tag_version
+        if [ -n "$tag_version" ]; then
+            build_image "$tag_version"
         fi
         ;;
     push)
-        push_image $version && \
+        push_image "$version" && \
         if [ "$push_to_latest_tag" == true ] ; then
             push_image "latest"
         fi
-        if ! [ -z $tag_version ]; then
-            push_image $tag_version
+        if [ -n "$tag_version" ]; then
+            push_image "$tag_version"
         fi
         ;;
     show)
-        show $version $filename
+        show "$version" "$filename"
         ;;
     k8scommit)
         if k8scommit; then
@@ -143,38 +142,38 @@ case $subcommand in
         fi
         ;;
     k8s_set_images)
-        show $version $filename | jq -r '.commands[]' | while read i; do
+        show "$version" "$filename" | jq -r '.commands[]' | while read -r i; do
             _k "$i"
         done
         ;;
     k8s_cm_patch)
         if k8scommit; then
-            meta=$(show $githash7 $filename | jq ".metadata")
-            namespace=$(echo $meta | jq -r ".namespace")
-            configmap=$(echo $meta | jq -r ".name")
+            meta=$(show "$githash7" "$filename" | jq ".metadata")
+            namespace=$(echo "$meta" | jq -r ".namespace")
+            configmap=$(echo "$meta" | jq -r ".name")
 
             patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
-            resourceName=$(echo $meta | jq -r ".labels.deployment")
+            resourceName=$(echo "$meta" | jq -r ".labels.deployment")
             k8sresource='deployment'
-            if echo $meta | jq -e -r ".labels.cronjob"; then
+            if echo "$meta" | jq -e -r ".labels.cronjob"; then
                 k8sresource='cronjob'
-                resourceName=$(echo $meta | jq -r ".labels.cronjob")
+                resourceName=$(echo "$meta" | jq -r ".labels.cronjob")
                 patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_cronjob_env("'$configmap'")'
             fi
 
-            if echo $meta | jq -e -r ".labels.job"; then
+            if echo "$meta" | jq -e -r ".labels.job"; then
                 k8sresource='job'
-                resourceName=$(echo $meta | jq -r ".labels.job")
+                resourceName=$(echo "$meta" | jq -r ".labels.job")
                 patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_job_env("'$configmap'")'
             fi
 
-            patch=$(echo $patchscript | show $githash7 '-')
-            echo "patching with: ""$patch"
-            _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p \"$(echo $patch)\""
+            patch=$(echo "$patchscript" | show "$githash7" '-')
+            echo "patching with: $patch"
+            _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p $patch"
         fi
         ;;
     k8s_apply)
-        content=$(show $version $filename)
+        content=$(show "$version" "$filename")
         _k "apply --record -f - --dry-run=$dryrun" "$content"
         ;;
     * )
