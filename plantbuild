@@ -77,11 +77,13 @@ dockerimage='theplant/plantbuild'
 
 push_image() {
     build_image "$1"
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push "$dcservice"
+    # shellcheck disable=SC2086
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push $dcservice
 }
 
 build_image() {
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build "$dcservice"
+    # shellcheck disable=SC2086
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build $dcservice
 }
 
 show() {
