@@ -17,32 +17,31 @@ push_to_latest_tag=true
 usage="Usage: plantbuild run/build/push/show/k8scommit/k8s_cm_patch/k8s_set_images/k8s_apply ./plantbuild/test.jsonnet -a=app1 -v=1.0.0"
 
 while getopts "v:a:b:d:l:" opt; do
-  case $opt in
-    v )
+    case $opt in
+    v)
         version=$OPTARG
-      ;;
-    a )
+        ;;
+    a)
         app=$OPTARG
         if [ -n "$app" ]; then
             dcservice=build_image_$OPTARG
         fi
-      ;;
-    b )
+        ;;
+    b)
         buildversion=":$OPTARG"
-      ;;
-    d )
+        ;;
+    d)
         dryrun=$OPTARG
-      ;;
-    l )
+        ;;
+    l)
         push_to_latest_tag=$OPTARG
-      ;;
-    \? )
+        ;;
+    \?)
         echo "$usage"
         exit 1
-      ;;
-  esac
+        ;;
+    esac
 done
-
 
 if [ -z "$jsonnetfile" ]; then
     echo "$usage"
@@ -54,7 +53,7 @@ if ! [ -e "$jsonnetfile" ]; then
     exit 1
 fi
 
-githash7=$(git rev-parse HEAD|cut -c 1-7)
+githash7=$(git rev-parse HEAD | cut -c 1-7)
 if [ -z "$version" ]; then
     version=$githash7
 fi
@@ -111,74 +110,83 @@ k8scommit() {
 }
 
 case $subcommand in
-    run)
-        docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - run "$app"_test
-        ;;
-    build)
-        build_image "$version"
-        if [ "$push_to_latest_tag" = true ] ; then
-            build_image "latest"
-        fi
-        if [ -n "$tag_version" ]; then
-            build_image "$tag_version"
-        fi
-        ;;
-    push)
-        push_image "$version"
-        if [ "$push_to_latest_tag" = true ] ; then
-            push_image "latest"
-        fi
-        if [ -n "$tag_version" ]; then
-            push_image "$tag_version"
-        fi
-        ;;
-    show)
-        show "$version" "$filename"
-        ;;
-    k8scommit)
-        if k8scommit; then
-            exit 0
-        else
-            exit 1
-        fi
-        ;;
-    k8s_set_images)
-        show "$version" "$filename" | jq -r '.commands[]' | while read -r i; do
-            _k "$i"
-        done
-        ;;
-    k8s_cm_patch)
-        if k8scommit; then
-            meta=$(show "$githash7" "$filename" | jq ".metadata")
-            namespace=$(echo "$meta" | jq -r ".namespace")
-            configmap=$(echo "$meta" | jq -r ".name")
 
-            patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
-            resourceName=$(echo "$meta" | jq -r ".labels.deployment")
-            k8sresource='deployment'
-            if echo "$meta" | jq -e -r ".labels.cronjob"; then
-                k8sresource='cronjob'
-                resourceName=$(echo "$meta" | jq -r ".labels.cronjob")
-                patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_cronjob_env("'$configmap'")'
-            fi
+run)
+    docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - run "$app"_test
+    ;;
 
-            if echo "$meta" | jq -e -r ".labels.job"; then
-                k8sresource='job'
-                resourceName=$(echo "$meta" | jq -r ".labels.job")
-                patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_job_env("'$configmap'")'
-            fi
+build)
+    build_image "$version"
+    if [ "$push_to_latest_tag" = true ]; then
+        build_image "latest"
+    fi
+    if [ -n "$tag_version" ]; then
+        build_image "$tag_version"
+    fi
+    ;;
 
-            patch=$(echo "$patchscript" | show "$githash7" '-')
-            echo "patching with: $patch"
-            _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p $patch"
-        fi
-        ;;
-    k8s_apply)
-        content=$(show "$version" "$filename")
-        _k "apply --record -f - --dry-run=$dryrun" "$content"
-        ;;
-    * )
-        echo "$usage"
+push)
+    push_image "$version"
+    if [ "$push_to_latest_tag" = true ]; then
+        push_image "latest"
+    fi
+    if [ -n "$tag_version" ]; then
+        push_image "$tag_version"
+    fi
+    ;;
+
+show)
+    show "$version" "$filename"
+    ;;
+
+k8scommit)
+    if k8scommit; then
+        exit 0
+    else
         exit 1
-        ;;
+    fi
+    ;;
+
+k8s_set_images)
+    show "$version" "$filename" | jq -r '.commands[]' | while read -r i; do
+        _k "$i"
+    done
+    ;;
+
+k8s_cm_patch)
+    if k8scommit; then
+        meta=$(show "$githash7" "$filename" | jq ".metadata")
+        namespace=$(echo "$meta" | jq -r ".namespace")
+        configmap=$(echo "$meta" | jq -r ".name")
+
+        patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_deployment_env("'$configmap'")'
+        resourceName=$(echo "$meta" | jq -r ".labels.deployment")
+        k8sresource='deployment'
+        if echo "$meta" | jq -e -r ".labels.cronjob"; then
+            k8sresource='cronjob'
+            resourceName=$(echo "$meta" | jq -r ".labels.cronjob")
+            patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_cronjob_env("'$configmap'")'
+        fi
+
+        if echo "$meta" | jq -e -r ".labels.job"; then
+            k8sresource='job'
+            resourceName=$(echo "$meta" | jq -r ".labels.job")
+            patchscript='local k8s = import "k8s.jsonnet"; k8s.patch_job_env("'$configmap'")'
+        fi
+
+        patch=$(echo "$patchscript" | show "$githash7" '-')
+        echo "patching with: $patch"
+        _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p $patch"
+    fi
+    ;;
+
+k8s_apply)
+    content=$(show "$version" "$filename")
+    _k "apply --record -f - --dry-run=$dryrun" "$content"
+    ;;
+*)
+    echo "$usage"
+    exit 1
+    ;;
+
 esac
