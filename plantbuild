@@ -183,7 +183,7 @@ k8s_cm_patch)
 
         patch=$(echo "$patchscript" | show "$githash7" '-')
         echo "patching with: $patch"
-        _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p $patch"
+        _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p \"$patch\""
     fi
     ;;
 
