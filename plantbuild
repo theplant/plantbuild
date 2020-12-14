@@ -3,7 +3,7 @@
 set -o pipefail
 # set -o xtrace
 # set -o nounset
-# set -o errexit
+set -o errexit
 
 subcommand=$1
 shift
@@ -63,7 +63,7 @@ if [ -z "$version" ]; then
     version=$githash7
 fi
 
-tag_version=$(git describe --tags --exact-match 2>/dev/null)
+tag_version=$(git describe --tags --exact-match 2>/dev/null || echo "")
 
 dir=$(dirname "$jsonnetfile")
 filename=$(basename "$jsonnetfile")
