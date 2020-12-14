@@ -78,7 +78,7 @@ dockerimage='theplant/plantbuild'
 push_image() {
     build_image "$1"
 
-    compose_file_path="/tmp/${filename}.docker-compose.json"
+    compose_file_path="output-${filename}.docker-compose.json"
     docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
 
     if [ -n "$dcservice" ]; then
@@ -89,7 +89,7 @@ push_image() {
 }
 
 build_image() {
-    compose_file_path="/tmp/${filename}.docker-compose.json"
+    compose_file_path="output-${filename}.docker-compose.json"
     docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
 
     if [ -n "$dcservice" ]; then
