@@ -77,13 +77,26 @@ dockerimage='theplant/plantbuild'
 
 push_image() {
     build_image "$1"
-    # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push $dcservice
+
+    compose_file_path="/tmp/${filename}.docker-compose.json"
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
+
+    if [ -n "$dcservice" ]; then
+        docker-compose -f "$compose_file_path" push "$dcservice"
+    else
+        docker-compose -f "$compose_file_path"
+    fi
 }
 
 build_image() {
-    # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build $dcservice
+    compose_file_path="/tmp/${filename}.docker-compose.json"
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
+
+    if [ -n "$dcservice" ]; then
+        docker-compose -f "$compose_file_path" build "$dcservice"
+    else
+        docker-compose -f "$compose_file_path"
+    fi
 }
 
 show() {
