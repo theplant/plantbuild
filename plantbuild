@@ -84,7 +84,7 @@ push_image() {
     if [ -n "$dcservice" ]; then
         docker-compose -f "$compose_file_path" push "$dcservice"
     else
-        docker-compose -f "$compose_file_path"
+        docker-compose -f "$compose_file_path" push
     fi
 }
 
@@ -95,7 +95,7 @@ build_image() {
     if [ -n "$dcservice" ]; then
         docker-compose -f "$compose_file_path" build "$dcservice"
     else
-        docker-compose -f "$compose_file_path"
+        docker-compose -f "$compose_file_path" build
     fi
 }
 
