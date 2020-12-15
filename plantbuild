@@ -77,28 +77,13 @@ dockerimage='theplant/plantbuild'
 
 push_image() {
     build_image "$1"
-
-    # Put it in HOME path to mitigate impact of this artifact on docker cache
-    compose_file_path="${HOME}/output-${filename}.docker-compose.json"
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
-
-    if [ -n "$dcservice" ]; then
-        docker-compose -f "$compose_file_path" push "$dcservice"
-    else
-        docker-compose -f "$compose_file_path" push
-    fi
+    # shellcheck disable=SC2086
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push $dcservice
 }
 
 build_image() {
-    # Put it in HOME path to mitigate impact of this artifact on docker cache
-    compose_file_path="${HOME}/output-${filename}.docker-compose.json"
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" >"$compose_file_path"
-
-    if [ -n "$dcservice" ]; then
-        docker-compose -f "$compose_file_path" build "$dcservice"
-    else
-        docker-compose -f "$compose_file_path" build
-    fi
+    # shellcheck disable=SC2086
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build $dcservice
 }
 
 show() {
