@@ -75,8 +75,13 @@ cfg {
     envmap={},
     env=[],
     container={},
+    volumes=[],
     podSpec=root.podSpec,
   ):: {
+    local vols = if std.length(volumes) > 0 then
+      {
+        volumes: volumes,
+      } else {},
     kind: 'CronJob',
     apiVersion: 'batch/v1beta1',
     metadata: {
@@ -115,7 +120,7 @@ cfg {
                   imagePullPolicy: 'IfNotPresent',
                 } + configmapref(configmap) + envRef(envmap, env) + container,
               ],
-            } + imagePullSecretsRef(imagePullSecrets) + podSpec,
+            } + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
           },
         },
       },
