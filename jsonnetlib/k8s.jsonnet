@@ -314,7 +314,7 @@ cfg {
     env=[],
     container={},
     volumes=[],
-    terminationGracePeriodSeconds=30,
+    terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     minReplicas=2,
     maxReplicas=3,
     targetCPUUtilizationPercentage=75,
@@ -453,7 +453,7 @@ cfg {
     maxSurge=root.maxSurge,
     container={},
     volumes=[],
-    terminationGracePeriodSeconds='',
+    terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     podSpec=root.podSpec,
   ):: {
     local labels = { app: name },
