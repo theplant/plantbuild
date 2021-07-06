@@ -314,6 +314,7 @@ cfg {
     env=[],
     container={},
     volumes=[],
+    terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     minReplicas=2,
     maxReplicas=3,
     targetCPUUtilizationPercentage=75,
@@ -341,6 +342,7 @@ cfg {
         env=env,
         container=container,
         volumes=volumes,
+        terminationGracePeriodSeconds=terminationGracePeriodSeconds,
         podSpec=podSpec,
       ),
       root.svc(namespace, name, port, targetPort),
@@ -451,6 +453,7 @@ cfg {
     maxSurge=root.maxSurge,
     container={},
     volumes=[],
+    terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     podSpec=root.podSpec,
   ):: {
     local labels = { app: name },
@@ -479,6 +482,10 @@ cfg {
     local vols = if std.length(volumes) > 0 then
       {
         volumes: volumes,
+      } else {},
+    local graceShutdown = if std.length(std.toString(terminationGracePeriodSeconds)) > 0 then
+      {
+        terminationGracePeriodSeconds: terminationGracePeriodSeconds,
       } else {},
     local colocatedSelector = {
       labelSelector: {
@@ -553,7 +560,7 @@ cfg {
               },
             } + probe + configmapref(configmap) + envRef(envmap, env) + container,
           ],
-        } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
+        } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec + graceShutdown,
       },
     },
   },
