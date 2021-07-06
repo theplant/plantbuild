@@ -483,7 +483,7 @@ cfg {
       {
         volumes: volumes,
       } else {},
-    local graceShutdown = if std.length(std.toString(terminationGracePeriodSeconds)) > 0 then
+    local graceShutdown = if terminationGracePeriodSeconds > 0 then
       {
         terminationGracePeriodSeconds: terminationGracePeriodSeconds,
       } else {},
