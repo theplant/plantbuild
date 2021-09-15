@@ -84,6 +84,7 @@ cfg {
       ['%s_test' % m]: {
         build: {
           context: './%s' % m,
+          platform: 'linux/amd64,linux/arm64',
           dockerfile: './Test.Dockerfile',
           args: [
             'NPM_TOKEN=$NPM_TOKEN',
@@ -104,6 +105,7 @@ cfg {
       build_image: {
         build: {
           context: '.',
+          platform: 'linux/amd64,linux/arm64',
           dockerfile: dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
@@ -126,6 +128,7 @@ cfg {
         name: name,
         dockerfile: './%s/Dockerfile' % name,
         context: '.',
+        platform: 'linux/amd64,linux/arm64',
       };
 
       if std.type(m) == 'object' then
@@ -139,6 +142,7 @@ cfg {
       ['build_image_%s' % to_obj(m).name]: {
         build: {
           context: to_obj(m).context,
+          platform: to_obj(m).platform,
           dockerfile: to_obj(m).dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
@@ -157,6 +161,7 @@ cfg {
       build_image: {
         build: {
           context: '.',
+          platform: 'linux/amd64,linux/arm64',
           dockerfile: './Dockerfile',
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
