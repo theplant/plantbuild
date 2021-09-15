@@ -84,13 +84,13 @@ cfg {
       ['%s_test' % m]: {
         build: {
           context: './%s' % m,
-          platform: 'linux/amd64,linux/arm64',
           dockerfile: './Test.Dockerfile',
           args: [
             'NPM_TOKEN=$NPM_TOKEN',
           ],
         },
         entrypoint: 'yarn ci',
+        platform: 'linux/amd64,linux/arm64',
       }
       for m in apps
     },
@@ -105,7 +105,6 @@ cfg {
       build_image: {
         build: {
           context: '.',
-          platform: 'linux/amd64,linux/arm64',
           dockerfile: dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
@@ -113,6 +112,7 @@ cfg {
             'WORKDIR=%s/%s' % [root.projectRoot, pkg],
           ],
         },
+        platform: 'linux/amd64,linux/arm64',
         image: if for_multiple_apps then image_path(pkg, 'dep', root.version) else root.with_registry('%s-dep:%s' % [pkg, root.version]),
       },
     },
@@ -128,7 +128,6 @@ cfg {
         name: name,
         dockerfile: './%s/Dockerfile' % name,
         context: '.',
-        platform: 'linux/amd64,linux/arm64',
       };
 
       if std.type(m) == 'object' then
@@ -142,7 +141,6 @@ cfg {
       ['build_image_%s' % to_obj(m).name]: {
         build: {
           context: to_obj(m).context,
-          platform: to_obj(m).platform,
           dockerfile: to_obj(m).dockerfile,
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
@@ -150,6 +148,7 @@ cfg {
           ],
         },
         image: image_path(pkg, to_obj(m).name, root.version),
+        platform: 'linux/amd64,linux/arm64',
       }
       for m in apps
     },
@@ -161,7 +160,6 @@ cfg {
       build_image: {
         build: {
           context: '.',
-          platform: 'linux/amd64,linux/arm64',
           dockerfile: './Dockerfile',
           args: [
             'GITHUB_TOKEN=$GITHUB_TOKEN',
@@ -169,6 +167,7 @@ cfg {
           ],
         },
         image: root.with_registry('%s:%s' % [pkg, root.version]),
+        platform: 'linux/amd64,linux/arm64',
       },
     },
   },
