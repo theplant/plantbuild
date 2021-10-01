@@ -417,7 +417,7 @@ cfg {
     root.ingress(namespace, name, rules, tls, annotations),
 
   ingress(namespace=root.defaultNamespace, name, rules, tls=[], annotations={}):: {
-    apiVersion: 'networking.k8s.io/v1beta1',
+    apiVersion: 'networking.k8s.io/v1',
     kind: 'Ingress',
     metadata: {
       name: name,
