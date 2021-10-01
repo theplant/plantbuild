@@ -4,7 +4,7 @@
 		"asserts": [
 			{
 				"jq_path": ".commands[0]",
-				"expected": "-n demo-mcd-services --record set image deployment/mop-catalogue-api mop-catalogue-api=123055475123.dkr.ecr.ap-northeast-1.amazonaws.com/mcd-services/catalogue-api:1.2.3"
+				"expected": "-n demo-mcd-services set image deployment/mop-catalogue-api mop-catalogue-api=123055475123.dkr.ecr.ap-northeast-1.amazonaws.com/mcd-services/catalogue-api:1.2.3"
 			}
 		]
 	},
