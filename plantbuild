@@ -183,13 +183,13 @@ k8s_cm_patch)
 
         patch=$(echo "$patchscript" | show "$githash7" '-')
         echo "patching with: $patch"
-        _k "-n $namespace patch $k8sresource/$resourceName --record --type=json -p \"$patch\""
+        _k "-n $namespace patch $k8sresource/$resourceName --type=json -p \"$patch\""
     fi
     ;;
 
 k8s_apply)
     content=$(show "$version" "$filename")
-    _k "apply --record -f - --dry-run=$dryrun" "$content"
+    _k "apply -f - --dry-run=$dryrun" "$content"
     ;;
 *)
     echo "$usage"
