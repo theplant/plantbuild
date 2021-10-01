@@ -90,7 +90,6 @@ cfg {
           ],
         },
         entrypoint: 'yarn ci',
-        platform: 'linux/amd64,linux/arm64',
       }
       for m in apps
     },
@@ -112,7 +111,6 @@ cfg {
             'WORKDIR=%s/%s' % [root.projectRoot, pkg],
           ],
         },
-        platform: 'linux/amd64,linux/arm64',
         image: if for_multiple_apps then image_path(pkg, 'dep', root.version) else root.with_registry('%s-dep:%s' % [pkg, root.version]),
       },
     },
@@ -148,7 +146,6 @@ cfg {
           ],
         },
         image: image_path(pkg, to_obj(m).name, root.version),
-        platform: 'linux/amd64,linux/arm64',
       }
       for m in apps
     },
@@ -167,7 +164,6 @@ cfg {
           ],
         },
         image: root.with_registry('%s:%s' % [pkg, root.version]),
-        platform: 'linux/amd64,linux/arm64',
       },
     },
   },
