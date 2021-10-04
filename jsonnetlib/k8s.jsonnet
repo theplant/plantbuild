@@ -399,8 +399,12 @@ cfg {
             {
               path: path,
               backend: {
-                serviceName: name,
-                servicePort: port,
+                service: {
+                  name: name,
+                  port: {
+                    number: port,
+                  },
+                },
               },
             },
           ],
