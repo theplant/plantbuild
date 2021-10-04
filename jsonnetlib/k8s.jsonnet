@@ -398,7 +398,7 @@ cfg {
           paths: [
             {
               path: path,
-              pathType: 'Exact',
+              pathType: 'ImplementationSpecific',
               backend: {
                 service: {
                   name: name,
