@@ -398,6 +398,7 @@ cfg {
           paths: [
             {
               path: path,
+              pathType: 'Exact',
               backend: {
                 service: {
                   name: name,
