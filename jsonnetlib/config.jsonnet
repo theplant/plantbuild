@@ -20,6 +20,7 @@ assert std.length(v) > 0 : 'version is empty';
   projectRoot: '/go/src/github.com',
   podSpec: {},
   terminationGracePeriodSeconds: 30,
+  ingressClassName: 'nginx',
 
   // config helper func
   local root = self,

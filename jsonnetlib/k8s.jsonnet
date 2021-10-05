@@ -433,6 +433,7 @@ cfg {
       },
     },
     spec: {
+      ingressClassName: root.ingressClassName,
       rules: rules,
       tls: tls,
     },
