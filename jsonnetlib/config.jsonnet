@@ -15,7 +15,7 @@ assert std.length(v) > 0 : 'version is empty';
   maxSurge: 1,
   replicas: 1,
   minAvailable: 1,
-  failedJobsHistoryLimit: 2,
+  failedJobsHistoryLimit: 1,
   successfulJobsHistoryLimit: 1,
   projectRoot: '/go/src/github.com',
   podSpec: {},
