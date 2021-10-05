@@ -21,6 +21,7 @@ assert std.length(v) > 0 : 'version is empty';
   podSpec: {},
   terminationGracePeriodSeconds: 30,
   ingressClassName: 'nginx',
+  pathType: 'ImplementationSpecific',
 
   // config helper func
   local root = self,
