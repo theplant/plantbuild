@@ -83,7 +83,7 @@ cfg {
         volumes: volumes,
       } else {},
     kind: 'CronJob',
-    apiVersion: 'batch/v1beta1',
+    apiVersion: 'batch/v1',
     metadata: {
       namespace: namespace,
       name: name,
