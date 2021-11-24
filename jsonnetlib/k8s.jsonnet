@@ -572,7 +572,7 @@ cfg {
   },
 
   pdb(namespace=root.defaultNamespace, name, minAvailable=root.minAvailable):: {
-    apiVersion: 'policy/v1beta1',
+    apiVersion: 'policy/v1',
     kind: 'PodDisruptionBudget',
     metadata: {
       namespace: namespace,
