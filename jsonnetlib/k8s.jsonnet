@@ -77,6 +77,7 @@ cfg {
     container={},
     volumes=[],
     podSpec=root.podSpec,
+    cronjobSpec=root.cronjobSpec,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
@@ -124,7 +125,7 @@ cfg {
           },
         },
       },
-    },
+    } + cronjobSpec,
   },
 
   job(
