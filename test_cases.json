@@ -240,5 +240,14 @@
 				"expected": "kill -15 -1"
 			}
 		]
+	},
+	{
+		"show_args": "./example/k8s/cronjob.jsonnet",
+		"asserts": [
+			{
+				"jq_path": ".spec.concurrencyPolicy",
+				"expected": "Forbid"
+			}
+		]
 	}
 ]
