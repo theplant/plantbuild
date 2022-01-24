@@ -19,6 +19,7 @@ assert std.length(v) > 0 : 'version is empty';
   successfulJobsHistoryLimit: 1,
   projectRoot: '/go/src/github.com',
   podSpec: {},
+  cronjobSpec: {},
   terminationGracePeriodSeconds: 30,
   ingressClassName: 'nginx',
   pathType: 'ImplementationSpecific',
