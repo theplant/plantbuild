@@ -78,6 +78,8 @@ cfg {
     volumes=[],
     podSpec=root.podSpec,
     cronjobSpec=root.cronjobSpec,
+    memoryRequest=root.cronMemoryRequest,
+    memoryLimit=root.cronMemoryLimit,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
