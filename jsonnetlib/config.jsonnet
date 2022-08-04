@@ -8,6 +8,8 @@ assert std.length(v) > 0 : 'version is empty';
   defaultNamespace: 'default',
   port: 4000,
   baseHost: '',
+  cronCPURequest: '200m',
+  cronCPULimit: '1',
   cronMemoryRequest: '10Mi',
   cronMemoryLimit: '2Gi',
   memoryRequest: '10Mi',
