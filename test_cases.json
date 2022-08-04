@@ -254,7 +254,7 @@
 			},
 			{
 				"jq_path": ".spec.jobTemplate.spec.template.spec.containers[0].resources.limits.cpu",
-				"expected": "1"
+				"expected": "500m"
 			}
 		]
 	}
