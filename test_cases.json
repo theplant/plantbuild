@@ -247,6 +247,14 @@
 			{
 				"jq_path": ".spec.concurrencyPolicy",
 				"expected": "Forbid"
+			},
+			{
+				"jq_path": ".spec.jobTemplate.spec.template.spec.containers[0].resources.requests.cpu",
+				"expected": "100m"
+			},
+			{
+				"jq_path": ".spec.jobTemplate.spec.template.spec.containers[0].resources.limits.cpu",
+				"expected": "500m"
 			}
 		]
 	}

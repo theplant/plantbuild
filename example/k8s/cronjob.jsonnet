@@ -16,4 +16,5 @@ k8s.cronjob(
       "echo 'Hello world $HelloName'",
     ],
   },
+  cpuRequest='100m',
 )

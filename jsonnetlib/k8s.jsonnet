@@ -78,6 +78,10 @@ cfg {
     volumes=[],
     podSpec=root.podSpec,
     cronjobSpec=root.cronjobSpec,
+    cpuRequest=root.cronCPURequest,
+    cpuLimit=root.cronCPULimit,
+    memoryRequest=root.cronMemoryRequest,
+    memoryLimit=root.cronMemoryLimit,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
@@ -119,6 +123,16 @@ cfg {
                   name: name,
                   image: resolve_image(namespace, name, image),
                   imagePullPolicy: 'IfNotPresent',
+                  resources: {
+                    limits: {
+                      cpu: cpuLimit,
+                      memory: memoryLimit,
+                    },
+                    requests: {
+                      cpu: cpuRequest,
+                      memory: memoryRequest,
+                    },
+                  },
                 } + configmapref(configmap) + envRef(envmap, env) + container,
               ],
             } + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
