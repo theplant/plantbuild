@@ -27,6 +27,7 @@ assert std.length(v) > 0 : 'version is empty';
   terminationGracePeriodSeconds: 30,
   ingressClassName: 'nginx',
   pathType: 'ImplementationSpecific',
+  strategyType: 'RollingUpdate',
 
   // config helper func
   local root = self,

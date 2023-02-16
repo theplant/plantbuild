@@ -334,6 +334,7 @@ cfg {
     maxReplicas=3,
     targetCPUUtilizationPercentage=75,
     podSpec=root.podSpec,
+    strategyType=root.strategyType,
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -359,6 +360,7 @@ cfg {
         volumes=volumes,
         terminationGracePeriodSeconds=terminationGracePeriodSeconds,
         podSpec=podSpec,
+        strategyType=strategyType,
       ),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
@@ -476,6 +478,7 @@ cfg {
     volumes=[],
     terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     podSpec=root.podSpec,
+    strategyType=root.strategyType
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {}
@@ -548,7 +551,7 @@ cfg {
           maxSurge: maxSurge,
           maxUnavailable: 0,
         },
-        type: 'RollingUpdate',
+        type: strategyType,
       },
       selector: {
         matchLabels: labels,
