@@ -619,5 +619,4 @@ cfg {
       targetCPUUtilizationPercentage: targetCPUUtilizationPercentage,
     },
   },
-
 }
