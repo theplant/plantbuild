@@ -180,7 +180,7 @@
 				"expected": 5
 			},
 			{
-				"jq_path": ".items[3].spec.targetCPUUtilizationPercentage",
+				"jq_path": ".items[3].spec.metrics[0].resource.target.averageUtilization",
 				"expected": 70
 			}
 		]
@@ -197,7 +197,7 @@
 				"expected": 5
 			},
 			{
-				"jq_path": ".items[1].spec.targetCPUUtilizationPercentage",
+				"jq_path": ".items[1].spec.metrics[0].resource.target.averageUtilization",
 				"expected": 75
 			}
 		]
