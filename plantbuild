@@ -71,7 +71,7 @@ filename=$(basename "$jsonnetfile")
 if [ -z "$KUBECTL_BASH" ]; then
     KUBECTL_BASH="/bin/bash"
 fi
-dockerimage='theplant/plantbuild'
+dockerimage='public.ecr.aws/theplant/plantbuild'
 
 # functions
 

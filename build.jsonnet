@@ -1,5 +1,5 @@
 local dc = import 'dc.jsonnet';
 local ndc = dc {
-  dockerRegistry: '',
+  dockerRegistry: 'public.ecr.aws',
 };
 ndc.build_image('theplant/plantbuild')
