@@ -601,8 +601,8 @@ cfg {
     },
   },
 
-  hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage):: {
-    apiVersion: 'autoscaling/v1',
+  hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage, targetMemoryUtilizationPercentage=0):: {
+    apiVersion: 'autoscaling/v2',
     kind: 'HorizontalPodAutoscaler',
     metadata: {
       namespace: namespace,
@@ -616,8 +616,25 @@ cfg {
       },
       minReplicas: minReplicas,
       maxReplicas: maxReplicas,
-      targetCPUUtilizationPercentage: targetCPUUtilizationPercentage,
+      metrics: [{
+        type: 'Resource',
+        resource: {
+          name: 'cpu',
+          target: {
+            type: 'Utilization',
+            averageUtilization: targetCPUUtilizationPercentage,
+          },
+        },
+      }] + if targetMemoryUtilizationPercentage > 0 then [{
+        type: 'Resource',
+        resource: {
+          name: 'memory',
+          target: {
+            type: 'Utilization',
+            averageUtilization: targetMemoryUtilizationPercentage,
+          },
+        },
+      }] else [],
     },
   },
-
 }
