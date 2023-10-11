@@ -2,7 +2,7 @@
 
 a command line tool to test, build, push docker images, write kubernetes configurations and deploy to kubernetes cluster. it heavily uses the fantastic [Jsonnet programming language](https://jsonnet.org)
 
-It utilize a docker image published at `public.ecr.aws/theplant/plantbuild:latest`, This docker image includes:
+It utilize a docker image published at `ghcr.io/theplant/plantbuild:latest`, This docker image includes:
 
 - The jsonnet binary to execute jsonnet files to generate json output
 - The image building, testing docker-compose and deploying kubernetes jsonnet template functions
@@ -102,7 +102,7 @@ It first import the library dc.jsonnet from theplant/plantbuild docker image,
 And then it config the modules the projects that needs to test, and the function `dc.go_test` generate a valid docker-compose file for you to run those tests, You can run this to checkout the output docker-compose file content
 
 ```
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/test.jsonnet -v `pwd`/example:/src public.ecr.aws/theplant/plantbuild
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/test.jsonnet -v `pwd`/example:/src ghcr.io/theplant/plantbuild
 ```
 
 Then `plantbuild` command wraps the above commands gives you a short way of invoking the command. simplify the above command to:
