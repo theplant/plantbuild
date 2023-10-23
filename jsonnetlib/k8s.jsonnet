@@ -334,6 +334,7 @@ cfg {
     maxReplicas=3,
     targetCPUUtilizationPercentage=75,
     podSpec=root.podSpec,
+    withoutRollingUpdate=false,
   ):: {
     apiVersion: 'v1',
     kind: 'List',
@@ -359,6 +360,7 @@ cfg {
         volumes=volumes,
         terminationGracePeriodSeconds=terminationGracePeriodSeconds,
         podSpec=podSpec,
+        withoutRollingUpdate=withoutRollingUpdate,
       ),
       root.svc(namespace, name, port, targetPort),
       root.single_svc_ingress(
@@ -476,6 +478,7 @@ cfg {
     volumes=[],
     terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     podSpec=root.podSpec,
+    withoutRollingUpdate=false,
   ):: {
     local labels = { app: name },
     local probe = if withoutProbe then {}
@@ -534,6 +537,19 @@ cfg {
         },
       },
     },
+    local strategy = if withoutRollingUpdate then {
+      strategy: {
+        type: 'Recreate',
+      },
+    } else {
+      strategy: {
+        rollingUpdate: {
+          maxSurge: maxSurge,
+          maxUnavailable: 0,
+        },
+        type: 'RollingUpdate',
+      },
+    },
     apiVersion: 'apps/v1',
     kind: 'Deployment',
     metadata: {
@@ -543,13 +559,6 @@ cfg {
     },
     spec: {
       replicas: replicas,
-      strategy: {
-        rollingUpdate: {
-          maxSurge: maxSurge,
-          maxUnavailable: 0,
-        },
-        type: 'RollingUpdate',
-      },
       selector: {
         matchLabels: labels,
       },
@@ -583,7 +592,7 @@ cfg {
           ],
         } + affinity + vols + imagePullSecretsRef(imagePullSecrets) + podSpec + graceShutdown,
       },
-    },
+    } + strategy,
   },
 
   pdb(namespace=root.defaultNamespace, name, minAvailable=root.minAvailable):: {
