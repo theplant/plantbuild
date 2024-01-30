@@ -83,7 +83,7 @@ push_image() {
 
 build_image() {
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build $dcservice
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build --parallel $dcservice
 }
 
 show() {
