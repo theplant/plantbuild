@@ -476,8 +476,9 @@ cfg {
     volumes=[],
     terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
     podSpec=root.podSpec,
+    customLabels={},
   ):: {
-    local labels = { app: name },
+    local labels = std.mergePatch({ app: name }, customLabels),
     local probe = if withoutProbe then {}
     else if std.objectHas(probes, 'livenessProbe') || std.objectHas(probes, 'readinessProbe') then probes
     else {
