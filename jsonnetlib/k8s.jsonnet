@@ -152,7 +152,7 @@ cfg {
     env=[],
     container={},
     podSpec=root.podSpec,
-    ttl=180,
+    ttl=root.jobTTL,
   ):: {
     kind: 'Job',
     apiVersion: 'batch/v1',
