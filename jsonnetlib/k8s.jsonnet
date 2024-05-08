@@ -152,6 +152,7 @@ cfg {
     env=[],
     container={},
     podSpec=root.podSpec,
+    ttl=root.jobTTL,
   ):: {
     kind: 'Job',
     apiVersion: 'batch/v1',
@@ -164,7 +165,7 @@ cfg {
       },
     },
     spec: {
-      //   ttlSecondsAfterFinished: 5, // not supported yet
+      ttlSecondsAfterFinished: ttl,
       backoffLimit: 1,
       parallelism: 1,
       template: {
