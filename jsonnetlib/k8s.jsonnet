@@ -82,6 +82,7 @@ cfg {
     cpuLimit=root.cronCPULimit,
     memoryRequest=root.cronMemoryRequest,
     memoryLimit=root.cronMemoryLimit,
+    backoffLimit=0,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
@@ -109,7 +110,7 @@ cfg {
           },
         },
         spec: {
-          backoffLimit: 0,
+          backoffLimit: backoffLimit,
           template: {
             metadata: {
               labels: {
