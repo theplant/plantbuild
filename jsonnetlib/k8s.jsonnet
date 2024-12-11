@@ -59,7 +59,7 @@ cfg {
     apiVersion: 'v1',
     metadata: {
       namespace: namespace,
-      name: if withoutVersion then name else '%s-%s' % [name, root.version],
+      name: if withoutVersion then name else '%s-%s' % [name, std.substr(std.md5(std.manifestJsonMinified(data)), 0, 7)],
       labels: labels,
     },
     data: data,
