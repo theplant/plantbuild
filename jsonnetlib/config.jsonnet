@@ -28,6 +28,7 @@ assert std.length(v) > 0 : 'version is empty';
   ingressClassName: 'nginx',
   pathType: 'ImplementationSpecific',
   jobTTL: 1800,
+  cronjobTTL: 3600,
 
   // config helper func
   local root = self,
