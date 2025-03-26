@@ -83,7 +83,7 @@ cfg {
     memoryRequest=root.cronMemoryRequest,
     memoryLimit=root.cronMemoryLimit,
     backoffLimit=0,
-    ttl=root.jobTTL,
+    ttl=root.cronjobTTL,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
