@@ -83,15 +83,11 @@ cfg {
     memoryRequest=root.cronMemoryRequest,
     memoryLimit=root.cronMemoryLimit,
     backoffLimit=0,
-    ttl=null,
+    ttl=3600,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
         volumes: volumes,
-      } else {},
-    local ttlConfig = if ttl != null then
-      {
-        ttlSecondsAfterFinished: ttl,
       } else {},
     kind: 'CronJob',
     apiVersion: 'batch/v1',
@@ -115,6 +111,7 @@ cfg {
           },
         },
         spec: {
+          ttlSecondsAfterFinished: ttl,
           backoffLimit: backoffLimit,
           template: {
             metadata: {
@@ -144,7 +141,7 @@ cfg {
             } + vols + imagePullSecretsRef(imagePullSecrets) + podSpec,
           },
         },
-      } + ttlConfig,
+      },
     } + cronjobSpec,
   },
 
