@@ -374,7 +374,7 @@ cfg {
         path=path,
         annotations=ingressAnnotations,
       ),
-    ] + (if replicas > 1 && maxReplicas > 1 then [
+    ] + (if replicas > 1 && maxReplicas > 1 && maxReplicas > minReplicas then [
            root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
          ] else []) + if replicas > 1 then [
       root.pdb(namespace, name, minAvailable),
