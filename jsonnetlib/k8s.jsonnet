@@ -339,6 +339,9 @@ cfg {
     targetCPUUtilizationPercentage=75,
     podSpec=root.podSpec,
   ):: {
+    local hpaEnabled = replicas > 1 && maxReplicas > 1 && maxReplicas > minReplicas,
+    local deploymentReplicas = if hpaEnabled then null else replicas,
+
     apiVersion: 'v1',
     kind: 'List',
     items: [
@@ -349,7 +352,7 @@ cfg {
         port=port,
         probes=probes,
         configmap=configmap,
-        replicas=replicas,
+        replicas=deploymentReplicas,
         imagePullSecrets=imagePullSecrets,
         neverColocated=neverColocated,
         memoryRequest=memoryRequest,
@@ -374,7 +377,7 @@ cfg {
         path=path,
         annotations=ingressAnnotations,
       ),
-    ] + (if replicas > 1 && maxReplicas > 1 && maxReplicas > minReplicas then [
+    ] + (if hpaEnabled then [
            root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
          ] else []) + if replicas > 1 then [
       root.pdb(namespace, name, minAvailable),
@@ -546,7 +549,7 @@ cfg {
       labels: labels,
     },
     spec: {
-      replicas: replicas,
+      [if replicas != null then 'replicas']: replicas,
       strategy: {
         rollingUpdate: {
           maxSurge: maxSurge,
