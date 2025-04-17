@@ -156,12 +156,13 @@ cfg {
     container={},
     podSpec=root.podSpec,
     ttl=root.jobTTL,
+    generateName=false,
   ):: {
     kind: 'Job',
     apiVersion: 'batch/v1',
     metadata: {
       namespace: namespace,
-      name: name,
+      [if generateName then 'generateName' else 'name']: if generateName then '%s-' % name else name,
       labels: {
         app: name,
         job: name,
