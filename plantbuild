@@ -8,8 +8,12 @@ set -o errexit
 subcommand=$1
 shift
 
-jsonnetfile=$1
-shift
+if [[ "$subcommand" == "fmt-check" || "$subcommand" == "fmt-update" ]]; then
+    jsonnetfile="."
+else
+    jsonnetfile=$1
+    shift
+fi
 
 version=
 app=
@@ -94,6 +98,14 @@ show() {
     docker run -i --rm -e RUN=$source -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion"
 }
 
+fmt-check() {
+    docker run -i --rm -e VERSION="$1" -v "$(pwd)/$dir:/src" --entrypoint /fmt-check.sh "$dockerimage$buildversion"
+}
+
+fmt-update() {
+    docker run -i --rm -e VERSION="$1" -v "$(pwd)/$dir:/src" --entrypoint /fmt-update.sh "$dockerimage$buildversion"
+}
+
 _k() {
     if [ -z "$2" ]; then
         echo "kubectl $1"
@@ -144,6 +156,14 @@ push)
 
 show)
     show "$version" "$filename"
+    ;;
+
+fmt-check)
+    fmt-check "$version"
+    ;;
+
+fmt-update)
+    fmt-update "$version"
     ;;
 
 k8scommit)
