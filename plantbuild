@@ -8,7 +8,7 @@ set -o errexit
 subcommand=$1
 shift
 
-if [[ "$subcommand" == "fmt-verify" || "$subcommand" == "fmt-update" ]]; then
+if [[ "$subcommand" == "fmt-check" || "$subcommand" == "fmt-update" ]]; then
     jsonnetfile="."
 else
     jsonnetfile=$1
@@ -98,8 +98,8 @@ show() {
     docker run -i --rm -e RUN=$source -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion"
 }
 
-fmt-verify() {
-    docker run -i --rm -e VERSION="$1" -v "$(pwd)/$dir:/src" --entrypoint /fmt-verify.sh "$dockerimage$buildversion"
+fmt-check() {
+    docker run -i --rm -e VERSION="$1" -v "$(pwd)/$dir:/src" --entrypoint /fmt-check.sh "$dockerimage$buildversion"
 }
 
 fmt-update() {
@@ -158,8 +158,8 @@ show)
     show "$version" "$filename"
     ;;
 
-fmt-verify)
-    fmt-verify "$version"
+fmt-check)
+    fmt-check "$version"
     ;;
 
 fmt-update)
