@@ -323,6 +323,7 @@ cfg {
     port=root.port,
     probes={},
     targetPort=root.port,
+    headlessEnabled=false,
     neverColocated=false,
     memoryRequest=root.memoryRequest,
     cpuRequest=root.cpuRequest,
@@ -378,14 +379,20 @@ cfg {
         path=path,
         annotations=ingressAnnotations,
       ),
-    ] + (if hpaEnabled then [
+    ] 
+    + (if hpaEnabled then [
            root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
-         ] else []) + if replicas > 1 then [
+         ] else []) 
+    + (if replicas > 1 then [
       root.pdb(namespace, name, minAvailable),
-    ] else [],
+    ] else [])
+    + (if headlessEnabled then [
+           root.svc(namespace, name + "-hl", port, targetPort, headlessEnabled=headlessEnabled),
+         ] else []) 
+    ,
   },
 
-  svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port, annotations={}):: {
+  svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port, annotations={}, headlessEnabled=false):: {
     apiVersion: 'v1',
     kind: 'Service',
     metadata: {
@@ -409,6 +416,9 @@ cfg {
         app: name,
       },
     },
+  } 
+  + {
+  spec+: if headlessEnabled then { clusterIP: 'None' } else {}
   },
 
   single_svc_ingress(namespace=root.defaultNamespace, name, port, host='', path='/', ingressTLSEnabled=false, annotations={})::
