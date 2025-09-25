@@ -11,7 +11,7 @@ RUN --mount=type=cache,target=/go/pkg/mod \
     go install github.com/google/go-jsonnet/cmd/jsonnetfmt@${JSONNET_VERSION}
 
 # ---- runtime: Alpine ----
-FROM alpine:latest
+FROM alpine:3.22
 RUN apk add --no-cache ca-certificates
 COPY --from=jsonnet-builder /go/bin/jsonnet /usr/local/bin/jsonnet
 COPY --from=jsonnet-builder /go/bin/jsonnetfmt /usr/local/bin/jsonnetfmt
