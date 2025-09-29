@@ -384,7 +384,7 @@ cfg {
          ] else []) + (if replicas > 1 then [
                          root.pdb(namespace, name, minAvailable),
                        ] else []) + (if headlessEnabled then [
-                                       root.svc(namespace, name + '-hl', port, targetPort, headlessEnabled=headlessEnabled),
+                                       root.svc(namespace, name, port, targetPort, headlessEnabled=headlessEnabled),
                                      ] else []),
   },
 
@@ -413,6 +413,7 @@ cfg {
       },
     },
   } + {
+    metadata+: if headlessEnabled then { name: name + '-hl' } else {},
     spec+: if headlessEnabled then { clusterIP: 'None' } else {},
   },
 
