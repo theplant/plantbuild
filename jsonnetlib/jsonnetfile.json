@@ -5,7 +5,16 @@
       "source": {
         "git": {
           "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
-          "subdir": "1.32"
+          "subdir": "1.34"
+        }
+      },
+      "version": "main"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/gateway-api-libsonnet.git",
+          "subdir": "1.5"
         }
       },
       "version": "main"

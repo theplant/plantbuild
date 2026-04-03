@@ -4,12 +4,22 @@
     {
       "source": {
         "git": {
-          "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
-          "subdir": "1.32"
+          "remote": "https://github.com/jsonnet-libs/gateway-api-libsonnet.git",
+          "subdir": "1.5"
         }
       },
-      "version": "291653b2c17d03e855e7e00ce0e4ec25502b2ce2",
-      "sum": "L70C3SiMFOsNCuIGOxRKAzd6wUBuabAoEGrgvCyeCBc="
+      "version": "3fa622d87a7ec729c063e6d83a3911c726c83414",
+      "sum": "mhi0HdXGwpESFA6/IDE2btERJRoU24mbtIVjHP62in4="
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/k8s-libsonnet.git",
+          "subdir": "1.34"
+        }
+      },
+      "version": "55380470fb7979e6ce0c4316cb9c27a266caf298",
+      "sum": "eIIqaH7VaM+pTcMJXwoDyAgEwnyEJ+mVh6g51L86iuI="
     }
   ],
   "legacyImports": false
