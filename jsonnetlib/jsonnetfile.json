@@ -9,6 +9,15 @@
         }
       },
       "version": "main"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/gateway-api-libsonnet.git",
+          "subdir": "1.5"
+        }
+      },
+      "version": "main"
     }
   ],
   "legacyImports": true
