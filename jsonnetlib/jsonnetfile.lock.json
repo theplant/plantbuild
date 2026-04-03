@@ -4,6 +4,16 @@
     {
       "source": {
         "git": {
+          "remote": "https://github.com/jsonnet-libs/envoy-gateway-libsonnet.git",
+          "subdir": "v1.7.0"
+        }
+      },
+      "version": "5f2419841aecafe8e9a450b27e238c280e8736a5",
+      "sum": "5lVlcIUHX0ZKNLO1cWeCfLbFO7MmucgG5fgN0OCZXCc="
+    },
+    {
+      "source": {
+        "git": {
           "remote": "https://github.com/jsonnet-libs/gateway-api-libsonnet.git",
           "subdir": "1.5"
         }
