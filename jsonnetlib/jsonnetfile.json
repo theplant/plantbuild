@@ -18,6 +18,15 @@
         }
       },
       "version": "main"
+    },
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/jsonnet-libs/envoy-gateway-libsonnet.git",
+          "subdir": "v1.7.0"
+        }
+      },
+      "version": "main"
     }
   ],
   "legacyImports": true
