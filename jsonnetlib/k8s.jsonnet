@@ -340,52 +340,59 @@ cfg {
     maxReplicas=3,
     targetCPUUtilizationPercentage=75,
     podSpec=root.podSpec,
+    ingressEnabled=true,
   ):: {
     local hpaEnabled = replicas > 1 && maxReplicas > 1 && maxReplicas > minReplicas,
     local deploymentReplicas = if hpaEnabled then null else replicas,
 
     apiVersion: 'v1',
     kind: 'List',
-    items: [
-      root.deployment(
-        namespace=namespace,
-        name=name,
-        image=image,
-        port=port,
-        probes=probes,
-        configmap=configmap,
-        replicas=deploymentReplicas,
-        imagePullSecrets=imagePullSecrets,
-        neverColocated=neverColocated,
-        memoryRequest=memoryRequest,
-        cpuRequest=cpuRequest,
-        memoryLimit=memoryLimit,
-        cpuLimit=cpuLimit,
-        maxSurge=maxSurge,
-        envmap=envmap,
-        env=env,
-        container=container,
-        volumes=volumes,
-        terminationGracePeriodSeconds=terminationGracePeriodSeconds,
-        podSpec=podSpec,
-      ),
-      root.svc(namespace, name, port, targetPort),
-      root.single_svc_ingress(
-        namespace=namespace,
-        name=name,
-        port=port,
-        host=host,
-        ingressTLSEnabled=ingressTLSEnabled,
-        path=path,
-        annotations=ingressAnnotations,
-      ),
-    ] + (if hpaEnabled then [
+    items:
+      [
+        root.deployment(
+          namespace=namespace,
+          name=name,
+          image=image,
+          port=port,
+          probes=probes,
+          configmap=configmap,
+          replicas=deploymentReplicas,
+          imagePullSecrets=imagePullSecrets,
+          neverColocated=neverColocated,
+          memoryRequest=memoryRequest,
+          cpuRequest=cpuRequest,
+          memoryLimit=memoryLimit,
+          cpuLimit=cpuLimit,
+          maxSurge=maxSurge,
+          envmap=envmap,
+          env=env,
+          container=container,
+          volumes=volumes,
+          terminationGracePeriodSeconds=terminationGracePeriodSeconds,
+          podSpec=podSpec,
+        ),
+        root.svc(namespace, name, port, targetPort),
+      ]
+      + (if ingressEnabled then [
+           root.single_svc_ingress(
+             namespace=namespace,
+             name=name,
+             port=port,
+             host=host,
+             ingressTLSEnabled=ingressTLSEnabled,
+             path=path,
+             annotations=ingressAnnotations,
+           ),
+         ] else [])
+      + (if hpaEnabled then [
            root.hpa(namespace, name, minReplicas, maxReplicas, targetCPUUtilizationPercentage),
-         ] else []) + (if replicas > 1 then [
-                         root.pdb(namespace, name, minAvailable),
-                       ] else []) + (if headlessEnabled then [
-                                       root.svc(namespace, name, port, targetPort, headlessEnabled=headlessEnabled),
-                                     ] else []),
+         ] else [])
+      + (if replicas > 1 then [
+           root.pdb(namespace, name, minAvailable),
+         ] else [])
+      + (if headlessEnabled then [
+           root.svc(namespace, name, port, targetPort, headlessEnabled=headlessEnabled),
+         ] else []),
   },
 
   svc(namespace=root.defaultNamespace, name, port=root.port, targetPort=root.port, annotations={}, headlessEnabled=false):: {
