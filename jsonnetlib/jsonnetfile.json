@@ -23,10 +23,10 @@
       "source": {
         "git": {
           "remote": "https://github.com/jsonnet-libs/envoy-gateway-libsonnet.git",
-          "subdir": "v1.7.0"
+          "subdir": "v1.7.1"
         }
       },
-      "version": "main"
+      "version": "41e88ead9ed5418f59f3823d5b424932b0668d18"
     }
   ],
   "legacyImports": true
