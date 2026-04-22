@@ -109,6 +109,9 @@ cfg {
           labels: {
             app: name,
           },
+          annotations: {
+            'argocd.argoproj.io/ignore-resource-updates': 'true',
+          },
         },
         spec: {
           ttlSecondsAfterFinished: ttl,
@@ -117,6 +120,9 @@ cfg {
             metadata: {
               labels: {
                 app: name,
+              },
+              annotations: {
+                'argocd.argoproj.io/ignore-resource-updates': 'true',
               },
             },
             spec: {
