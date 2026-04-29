@@ -82,12 +82,12 @@ dockerimage='ghcr.io/theplant/plantbuild'
 push_image() {
     build_image "$1"
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - push $dcservice
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - push $dcservice
 }
 
 build_image() {
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - build $dcservice
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - build $dcservice
 }
 
 show() {
@@ -131,7 +131,7 @@ k8scommit() {
 case $subcommand in
 
 run)
-    docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker-compose -f - run "$app"_test
+    docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - run "$app"_test
     ;;
 
 build)
