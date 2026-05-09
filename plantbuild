@@ -86,8 +86,12 @@ push_image() {
 }
 
 build_image() {
+    # BUILDX_NO_DEFAULT_ATTESTATIONS=1: `build`/`push` invoke build_image multiple times (per tag),
+    # and provenance attestations differ each run, producing distinct Image Indexes in ECR for
+    # identical content. We don't verify attestations anywhere, so disable them to dedup by digest.
+
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - build $dcservice
+    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose -f - build $dcservice
 }
 
 show() {
