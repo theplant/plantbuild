@@ -84,6 +84,7 @@ cfg {
     memoryLimit=root.cronMemoryLimit,
     backoffLimit=0,
     ttl=root.cronjobTTL,
+    startingDeadlineSeconds=300,
   ):: {
     local vols = if std.length(volumes) > 0 then
       {
@@ -101,6 +102,7 @@ cfg {
     },
     spec: {
       schedule: schedule,
+      startingDeadlineSeconds: startingDeadlineSeconds,
       concurrencyPolicy: 'Allow',
       failedJobsHistoryLimit: root.failedJobsHistoryLimit,
       successfulJobsHistoryLimit: root.successfulJobsHistoryLimit,
