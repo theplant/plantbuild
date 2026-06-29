@@ -328,6 +328,11 @@ local k = import 'k.libsonnet';
     extraListeners=[],
     compression=true,
     enableHTTPListener=true,
+    // Controls whether ListenerSets may attach to this Gateway (spec.allowedListeners).
+    //   null            -> omit allowedListeners (API default: no ListenerSets allowed)
+    //   'Same' / 'All'  -> allow ListenerSets from the same / all namespaces
+    //   [ns, ...]       -> allow ListenerSets from the listed namespaces (Selector)
+    allowedListenerSetNamespaces=null,
   )::
     local gateway = gw_api.gateway.v1.gateway;
     local listeners = gateway.spec.listeners;
@@ -360,6 +365,18 @@ local k = import 'k.libsonnet';
         + tls.certificateRefs.withKind('Secret'),
       ]);
 
+    local allowedListeners =
+      if allowedListenerSetNamespaces == null then {}
+      else if std.type(allowedListenerSetNamespaces) == 'array' then
+        gateway.spec.allowedListeners.namespaces.withFrom('Selector')
+        + gateway.spec.allowedListeners.namespaces.selector.withMatchExpressions([{
+          key: 'kubernetes.io/metadata.name',
+          operator: 'In',
+          values: allowedListenerSetNamespaces,
+        }])
+      else
+        gateway.spec.allowedListeners.namespaces.withFrom(allowedListenerSetNamespaces);
+
     local gw =
       gateway.new(name)
       + gateway.metadata.withNamespace(namespace)
@@ -374,7 +391,8 @@ local k = import 'k.libsonnet';
          ] else [])
         + [httpsListener]
         + extraListeners
-      );
+      )
+      + allowedListeners;
 
     local route =
       httpRoute.new(name + '-tls-redirect')
