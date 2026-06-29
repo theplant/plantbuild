@@ -316,6 +316,7 @@ local k = import 'k.libsonnet';
     clusterIssuer='letsencrypt-gateway',
     extraListeners=[],
     compression=true,
+    enableHTTPListener=true,
   )::
     local gateway = gw_api.gateway.v1.gateway;
     local listeners = gateway.spec.listeners;
@@ -354,13 +355,14 @@ local k = import 'k.libsonnet';
       + gateway.metadata.withAnnotations({ 'cert-manager.io/cluster-issuer': clusterIssuer })
       + gateway.spec.withGatewayClassName(gatewayClassName)
       + gateway.spec.withListeners(
-        [
-          listeners.withName('http')
-          + listeners.withPort(80)
-          + listeners.withProtocol('HTTP')
-          + listeners.allowedRoutes.namespaces.withFrom('Same'),
-          httpsListener,
-        ] + extraListeners
+        (if enableHTTPListener then [
+           listeners.withName('http')
+           + listeners.withPort(80)
+           + listeners.withProtocol('HTTP')
+           + listeners.allowedRoutes.namespaces.withFrom('Same'),
+         ] else [])
+        + [httpsListener]
+        + extraListeners
       );
 
     local route =
@@ -398,7 +400,8 @@ local k = import 'k.libsonnet';
                   + backendTrafficPolicy.spec.compressor.withMinContentLength(1024),
                 ]);
 
-    local items = [gw, route]
+    local items = [gw]
+                  + (if enableHTTPListener then [route] else [])
                   + (if compression then [btp] else [])
                   + (if enableCloudfrontIPDetection then [
                        clientTrafficPolicy.new(name + '-cloudfront-trusted-ips')
