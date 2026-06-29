@@ -142,6 +142,39 @@ local k = import 'k.libsonnet';
     + ingress.spec.withRules(rules)
     + (if std.length(tls) > 0 then ingress.spec.withTls(tls) else {}),
 
+  hpa_for(
+    namespace,
+    name,
+    minReplicas,
+    maxReplicas=null,
+    targetCPUUtilizationPercentage=75,
+    targetMemoryUtilizationPercentage=75,
+    hpaMixin={},
+  )::
+    local hpa = k.autoscaling.v2.horizontalPodAutoscaler;
+    local metric = k.autoscaling.v2.metricSpec;
+    local cpuMetric = if targetCPUUtilizationPercentage != null then
+      metric.withType('Resource')
+      + metric.resource.withName('cpu')
+      + metric.resource.target.withType('Utilization')
+      + metric.resource.target.withAverageUtilization(targetCPUUtilizationPercentage);
+    local memoryMetric = if targetMemoryUtilizationPercentage != null then
+      metric.withType('Resource')
+      + metric.resource.withName('memory')
+      + metric.resource.target.withType('Utilization')
+      + metric.resource.target.withAverageUtilization(targetMemoryUtilizationPercentage);
+    hpa.new(name)
+    + hpa.metadata.withNamespace(namespace)
+    + hpa.spec.scaleTargetRef.withApiVersion('apps/v1')
+    + hpa.spec.scaleTargetRef.withKind('Deployment')
+    + hpa.spec.scaleTargetRef.withName(name)
+    + hpa.spec.withMinReplicas(minReplicas)
+    + hpa.spec.withMaxReplicas(if maxReplicas != null then maxReplicas else minReplicas * 2)
+    + hpa.spec.withMetrics(
+      std.filter(function(x) x != null, [cpuMetric, memoryMetric])
+    )
+    + hpaMixin,
+
   // serviceFor create service for a given deployment.
   service_for(deployment, ignored_labels=[], nameFormat='%(container)s-%(port)s')::
     local service = k.core.v1.service;
@@ -202,10 +235,6 @@ local k = import 'k.libsonnet';
     hpaMixin={},
     pdbMixin={},
   )::
-    local hpa = k.autoscaling.v2.horizontalPodAutoscaler;
-    local pdb = k.policy.v1.podDisruptionBudget;
-    local metric = k.autoscaling.v2.metricSpec;
-
     local d = root.deployment(
                 namespace=namespace,
                 name=name,
@@ -249,18 +278,6 @@ local k = import 'k.libsonnet';
 
     local items = [d, s, i];
 
-    local cpuMetric = if targetCPUUtilizationPercentage != null then
-      metric.withType('Resource')
-      + metric.resource.withName('cpu')
-      + metric.resource.target.withType('Utilization')
-      + metric.resource.target.withAverageUtilization(targetCPUUtilizationPercentage);
-
-    local memoryMetric = if targetMemoryUtilizationPercentage != null then
-      metric.withType('Resource')
-      + metric.resource.withName('memory')
-      + metric.resource.target.withType('Utilization')
-      + metric.resource.target.withAverageUtilization(targetMemoryUtilizationPercentage);
-
     local withIRSA = if irsaArn != '' then
       items + [
         k.core.v1.serviceAccount.new(name)
@@ -273,25 +290,19 @@ local k = import 'k.libsonnet';
       items;
 
     local withHPA = if minReplicas != null then
-      withIRSA + [
-        hpa.new(name)
-        + hpa.metadata.withNamespace(namespace)
-        + hpa.spec.scaleTargetRef.withApiVersion('apps/v1')
-        + hpa.spec.scaleTargetRef.withKind('Deployment')
-        + hpa.spec.scaleTargetRef.withName(name)
-        + hpa.spec.withMinReplicas(minReplicas)
-        + hpa.spec.withMaxReplicas(if maxReplicas != null then maxReplicas else minReplicas * 2)
-        + hpa.spec.withMetrics(
-          std.filter(
-            function(x) x != null,
-            [cpuMetric, memoryMetric]
-          )
-        )
-        + hpaMixin,
-      ]
+      withIRSA + [root.hpa_for(
+        namespace=namespace,
+        name=name,
+        minReplicas=minReplicas,
+        maxReplicas=maxReplicas,
+        targetCPUUtilizationPercentage=targetCPUUtilizationPercentage,
+        targetMemoryUtilizationPercentage=targetMemoryUtilizationPercentage,
+        hpaMixin=hpaMixin,
+      )]
     else
       withIRSA;
 
+    local pdb = k.policy.v1.podDisruptionBudget;
     local withPDB = if (replicas != null && replicas > 1) || minAvailable != null then
       withHPA + [
         pdb.new(name)
