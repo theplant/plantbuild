@@ -333,6 +333,7 @@ local k = import 'k.libsonnet';
     //   'Same' / 'All'  -> allow ListenerSets from the same / all namespaces
     //   [ns, ...]       -> allow ListenerSets from the listed namespaces (Selector)
     allowedListenerSetNamespaces=null,
+    gatewayMixin={},
   )::
     local gateway = gw_api.gateway.v1.gateway;
     local listeners = gateway.spec.listeners;
@@ -392,7 +393,8 @@ local k = import 'k.libsonnet';
         + [httpsListener]
         + extraListeners
       )
-      + allowedListeners;
+      + allowedListeners
+      + gatewayMixin;
 
     local route =
       httpRoute.new(name + '-tls-redirect')
