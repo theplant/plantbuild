@@ -1,8 +1,7 @@
 local v = std.extVar('VERSION');
-assert std.length(v) > 0 : 'version is empty';
 
 {
-  version: v,
+  version: if std.length(v) > 0 then v else 'latest',
   dockerRegistry: 'registry.example.com',
   imagePullSecrets: '',
   defaultNamespace: 'default',
