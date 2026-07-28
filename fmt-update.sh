@@ -4,4 +4,5 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-find . -name '*.jsonnet' -exec jsonnetfmt -i '{}' +
+# vendor/ holds jsonnet-bundler dependencies, they are not ours to format
+find . -name vendor -prune -o -name '*.jsonnet' -exec jsonnetfmt -i '{}' +

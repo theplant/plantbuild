@@ -13,6 +13,48 @@ It utilize a docker image published at `ghcr.io/theplant/plantbuild:latest`, Thi
 sudo curl -fsSL https://raw.githubusercontent.com/theplant/plantbuild/master/plantbuild > /usr/local/bin/plantbuild && sudo chmod +x /usr/local/bin/plantbuild
 ```
 
+## Vendoring the jsonnet libraries with jsonnet-bundler
+
+By default plantbuild generates manifests by running jsonnet inside the
+`ghcr.io/theplant/plantbuild` image, using the `jsonnetlib` baked into that image.
+
+Alternatively a project can pin the libraries itself with
+[jsonnet-bundler](https://github.com/jsonnet-bundler/jsonnet-bundler). Put a
+`jsonnetfile.json` in the root of your project:
+
+```json
+{
+  "version": 1,
+  "dependencies": [
+    {
+      "source": {
+        "git": {
+          "remote": "https://github.com/theplant/plantbuild.git",
+          "subdir": "jsonnetlib"
+        }
+      },
+      "version": "master"
+    }
+  ],
+  "legacyImports": true
+}
+```
+
+When plantbuild finds a `jsonnetfile.json` in the current directory it will:
+
+- download `jb` and `jsonnet` if they are not already on `PATH` (into a temp directory that
+  is removed on exit, so a fresh CI container needs no preinstalled toolchain)
+- run `jb install` to populate `vendor/`
+- generate manifests locally with `jsonnet -J vendor/jsonnetlib/ -J vendor/ -V VERSION=...`
+  instead of running the docker image
+
+`imports` keep working unchanged (`import 'k8s.jsonnet'`), and transitive dependencies of
+`jsonnetlib` (k8s-libsonnet, gateway-api-libsonnet, ...) resolve through `-J vendor/`.
+Projects without a `jsonnetfile.json` are unaffected and keep using the docker image.
+
+The downloaded tool versions can be overridden with the `JB_VERSION` and `JSONNET_VERSION`
+environment variables.
+
 ## Command Manual
 
 plantbuild -- Test, Build, Push images, and Deploy to kubernetes cluster
