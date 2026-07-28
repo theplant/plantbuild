@@ -62,6 +62,104 @@ if ! [ -e "$jsonnetfile" ]; then
     exit 1
 fi
 
+# Versions of the tools downloaded on demand for vendored (jsonnetfile.json) projects.
+JB_VERSION=${JB_VERSION:-v0.6.0}
+JSONNET_VERSION=${JSONNET_VERSION:-v0.22.0}
+
+# Downloaded tools live in a temp dir for the duration of this run only: plantbuild runs in
+# a fresh container each time, so there is nothing to gain from caching them on disk.
+tools_bin=
+
+os=
+arch=
+
+detect_platform() {
+    if [ -n "$os" ]; then
+        return
+    fi
+    case $(uname -s) in
+    Linux) os=linux ;;
+    Darwin) os=darwin ;;
+    *)
+        echo "unsupported os: $(uname -s)" >&2
+        exit 1
+        ;;
+    esac
+    case $(uname -m) in
+    x86_64 | amd64) arch=amd64 ;;
+    arm64 | aarch64) arch=arm64 ;;
+    *)
+        echo "unsupported architecture: $(uname -m)" >&2
+        exit 1
+        ;;
+    esac
+}
+
+# download <url> [output file, default stdout]
+# curl is not in every CI base image (alpine ships wget), so accept either.
+download() {
+    local url=$1
+    local out=${2:--}
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL --connect-timeout 10 --retry 3 -o "$out" "$url"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q -O "$out" "$url"
+    else
+        echo "neither curl nor wget is available to download $url" >&2
+        exit 1
+    fi
+}
+
+install_jb() {
+    local into=$1
+    download \
+        "https://github.com/jsonnet-bundler/jsonnet-bundler/releases/download/$JB_VERSION/jb-$os-$arch" \
+        "$into/jb"
+}
+
+install_jsonnet() {
+    local into=$1
+    download "https://github.com/google/go-jsonnet/releases/download/$JSONNET_VERSION/go-jsonnet_${JSONNET_VERSION#v}_${os}_${arch}.tar.gz" |
+        tar -xz -C "$into" jsonnet
+}
+
+# ensure_tool <command> <version> <install function>
+# Uses <command> from PATH when available, otherwise downloads it from its github release
+# into a temp dir that is put on PATH and removed when plantbuild exits.
+ensure_tool() {
+    local cmd=$1
+    local toolversion=$2
+    local installer=$3
+
+    if command -v "$cmd" >/dev/null 2>&1; then
+        return
+    fi
+
+    detect_platform
+
+    if [ -z "$tools_bin" ]; then
+        tools_bin=$(mktemp -d)
+        trap 'rm -rf "$tools_bin"' EXIT
+        export PATH="$tools_bin:$PATH"
+    fi
+
+    # to stderr: stdout of every subcommand must stay a clean manifest for jq/kubectl
+    echo "$cmd not found, downloading $cmd $toolversion" >&2
+    "$installer" "$tools_bin"
+    chmod +x "$tools_bin/$cmd"
+}
+
+# A jsonnetfile.json in the current directory means the jsonnet libraries (plantbuild's
+# jsonnetlib included) are vendored with jsonnet-bundler, so jsonnet runs locally against
+# ./vendor instead of running inside the plantbuild docker image.
+vendored=false
+if [ -f jsonnetfile.json ]; then
+    vendored=true
+    ensure_tool jb "$JB_VERSION" install_jb
+    ensure_tool jsonnet "$JSONNET_VERSION" install_jsonnet
+    jb install >&2
+fi
+
 githash7=$(git rev-parse HEAD | cut -c 1-7)
 if [ -z "$version" ]; then
     version=$githash7
@@ -82,7 +180,7 @@ dockerimage='ghcr.io/theplant/plantbuild'
 push_image() {
     build_image "$1"
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - push $dcservice
+    show "$1" "$filename" | docker compose -f - push $dcservice
 }
 
 build_image() {
@@ -91,11 +189,22 @@ build_image() {
     # identical content. We don't verify attestations anywhere, so disable them to dedup by digest.
 
     # shellcheck disable=SC2086
-    docker run -i --rm -e RUN="/src/$filename" -e VERSION="$1" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose -f - build $dcservice
+    show "$1" "$filename" | BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker compose -f - build $dcservice
 }
 
+# show <version> <jsonnet file relative to $dir, or - for stdin>
 show() {
-    local source=/src/$2
+    local source
+    if [ "$vendored" = true ]; then
+        source=$dir/$2
+        if [ "$2" = '-' ]; then
+            source='-'
+        fi
+        jsonnet -J vendor/jsonnetlib/ -J vendor/ -V VERSION="$1" "$source"
+        return
+    fi
+
+    source=/src/$2
     if [ "$2" = '-' ]; then
         source='-'
     fi
@@ -135,7 +244,7 @@ k8scommit() {
 case $subcommand in
 
 run)
-    docker run --rm -e RUN="/src/$filename" -e VERSION="$version" -v "$(pwd)/$dir:/src" "$dockerimage$buildversion" | docker compose -f - run "$app"_test
+    show "$version" "$filename" | docker compose -f - run "$app"_test
     ;;
 
 build)
