@@ -49,8 +49,13 @@ local k = import 'k.libsonnet';
     // Default probe configuration
     local lp = ctn.livenessProbe;
     local rp = ctn.readinessProbe;
+    // 注意：调用方一旦传了 probes，下面的默认值就**整体**不生效（这是替换，
+    // 不是 merge）。所以传 probes 时必须把每个参数都写全，否则会静默落到
+    // Kubernetes 的裸默认值（timeoutSeconds=1 / initialDelaySeconds=0）上。
     local defaultProbe = if withoutProbe then {}
-    else if std.objectHas(probes, 'livenessProbe') || std.objectHas(probes, 'readinessProbe') then probes
+    else if std.objectHas(probes, 'livenessProbe')
+            || std.objectHas(probes, 'readinessProbe')
+            || std.objectHas(probes, 'startupProbe') then probes
     else lp.tcpSocket.withPort(normalizedPorts[0].containerPort)
          + lp.withFailureThreshold(3)
          + lp.withInitialDelaySeconds(360)
@@ -72,8 +77,17 @@ local k = import 'k.libsonnet';
         + ctn.withPorts(normalizedPorts)
         + ctn.resources.withLimits(limits)
         + ctn.resources.withRequests(requests)
-        + (if !withoutProbe then { livenessProbe: defaultProbe.livenessProbe } else {})
-        + (if !withoutProbe then { readinessProbe: defaultProbe.readinessProbe } else {})
+        // 三个 probe 都按存在与否透传：此前 liveness / readiness 是无条件取
+        // defaultProbe.<name> 的，调用方只传其中一个就会 field does not exist。
+        + (if !withoutProbe && std.objectHas(defaultProbe, 'livenessProbe')
+           then { livenessProbe: defaultProbe.livenessProbe } else {})
+        + (if !withoutProbe && std.objectHas(defaultProbe, 'readinessProbe')
+           then { readinessProbe: defaultProbe.readinessProbe } else {})
+        // startupProbe 一旦通过，liveness / readiness 才开始执行，因此能同时满足
+        // 「启动期宽容」和「运行期敏感」——用 initialDelaySeconds 只能二选一
+        // （那是死等：服务早就起来了，liveness 在整个宽限期内仍然不工作）。
+        + (if !withoutProbe && std.objectHas(defaultProbe, 'startupProbe')
+           then { startupProbe: defaultProbe.startupProbe } else {})
         + ctn.withEnvMap(envmap)
         + container,
       ],
