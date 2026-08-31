@@ -18,15 +18,6 @@
 		]
 	},
 	{
-		"show_args": "./example/dep.jsonnet -v 1.0.0",
-		"asserts": [
-			{
-				"jq_path": ".services.build_image.image",
-				"expected": "hub.c.163.com/example/dep:1.0.0"
-			}
-		]
-	},
-	{
 		"show_args": "./example/test_customized_deps.jsonnet -v 1.0.0",
 		"asserts": [
 			{

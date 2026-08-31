@@ -95,27 +95,6 @@ cfg {
     },
   },
 
-  // Example:
-  //   given:  pkg = 'theplant/ec', -v latest
-  //   expect: image = $dockerRegistry/ec/dep:latest
-  go_build_dep_image(pkg, dockerfile='./Dep.Dockerfile', for_multiple_apps=true):: {
-    version: '3',
-    services: {
-      build_image: {
-        build: {
-          context: '.',
-          dockerfile: dockerfile,
-          args: [
-            'GITHUB_TOKEN=$GITHUB_TOKEN',
-            'NPM_TOKEN=$NPM_TOKEN',
-            'WORKDIR=%s/%s' % [root.projectRoot, pkg],
-          ],
-        },
-        image: if for_multiple_apps then image_path(pkg, 'dep', root.version) else root.with_registry('%s-dep:%s' % [pkg, root.version]),
-      },
-    },
-  },
-
   build_apps_image(pkg, apps):: {
     local to_obj(m) =
       local name = if std.type(m) == 'object' then

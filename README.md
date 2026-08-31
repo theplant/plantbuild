@@ -233,7 +233,6 @@ A list of functions inside the library:
 - dc.go_test
 - dc.go_apps_test
 - dc.node_apps_test
-- dc.go_build_dep_image
 - dc.build_image
 - dc.build_apps_image
 
