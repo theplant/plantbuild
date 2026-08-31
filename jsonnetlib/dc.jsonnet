@@ -5,23 +5,6 @@ cfg {
     local reg_ns = std.split(pkg, '/')[1];
     root.with_registry('%s/%s:%s' % [reg_ns, app, version])
   ,
-  node_apps_test(apps):: {
-    version: '3',
-    services: {
-      ['%s_test' % m]: {
-        build: {
-          context: './%s' % m,
-          dockerfile: './Test.Dockerfile',
-          args: [
-            'NPM_TOKEN=$NPM_TOKEN',
-          ],
-        },
-        entrypoint: 'yarn ci',
-      }
-      for m in apps
-    },
-  },
-
   build_apps_image(pkg, apps):: {
     local to_obj(m) =
       local name = if std.type(m) == 'object' then

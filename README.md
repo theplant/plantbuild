@@ -75,8 +75,7 @@ plantbuild show ./example/deploy.jsonnet -v 1.0.0
 
 #### Run with docker-compose
 
-Runs the `<app>_test` service of the given docker-compose jsonnet, for example one
-written with `dc.node_apps_test`.
+Runs the `<app>_test` service of the given docker-compose jsonnet.
 
 ```
 plantbuild run ./test.jsonnet -v 1.0.0 -a app1
@@ -222,7 +221,6 @@ A list of functions inside the library:
 
 ###  Docker Compose functions
 
-- dc.node_apps_test
 - dc.build_image
 - dc.build_apps_image
 
