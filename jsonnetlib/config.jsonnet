@@ -20,7 +20,6 @@ local v = std.extVar('VERSION');
   minAvailable: 1,
   failedJobsHistoryLimit: 1,
   successfulJobsHistoryLimit: 1,
-  projectRoot: '/go/src/github.com',
   podSpec: {},
   cronjobSpec: {},
   terminationGracePeriodSeconds: 30,
