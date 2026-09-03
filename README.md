@@ -61,12 +61,6 @@ plantbuild -- Test, Build, Push images, and Deploy to kubernetes cluster
 
 #### Display generated configuration json content
 
-show test docker-compose file
-
-```
-plantbuild show ./example/test.jsonnet -v 1.0.0
-```
-
 show docker-compose image build file
 
 ```
@@ -81,8 +75,10 @@ plantbuild show ./example/deploy.jsonnet -v 1.0.0
 
 #### Run with docker-compose
 
+Runs the `<app>_test` service of the given docker-compose jsonnet.
+
 ```
-plantbuild run ./example/test.jsonnet -v 1.0.0 -a app1
+plantbuild run ./test.jsonnet -v 1.0.0 -a app1
 ```
 
 #### Build and push images
@@ -126,31 +122,26 @@ The source code located inside jsonnetlib/dc.jsonnet which is for generate docke
 
 You write this in your projects
 
-test.jsonnet:
+build.jsonnet:
 
 ```
 local dc = import 'dc.jsonnet';
 
-local modules = [
-    "accounting",
-    "inventory",
-];
-
-dc.go_test("theplant/example", modules, ["postgres", "elasticsearch", "nats", "redis"])
+dc.build_apps_image("theplant/example", ["app1", "app2"])
 
 ```
 
 It first import the library dc.jsonnet from theplant/plantbuild docker image,
-And then it config the modules the projects that needs to test, and the function `dc.go_test` generate a valid docker-compose file for you to run those tests, You can run this to checkout the output docker-compose file content
+And then it config the apps of the project that needs images, and the function `dc.build_apps_image` generate a valid docker-compose file for you to build those images, You can run this to checkout the output docker-compose file content
 
 ```
-docker run --rm -e VERSION=1.2.0 -e RUN=/src/test.jsonnet -v `pwd`/example:/src ghcr.io/theplant/plantbuild
+docker run --rm -e VERSION=1.2.0 -e RUN=/src/build.jsonnet -v `pwd`/example:/src ghcr.io/theplant/plantbuild
 ```
 
 Then `plantbuild` command wraps the above commands gives you a short way of invoking the command. simplify the above command to:
 
 ```
-plantbuild show ./test.jsonnet
+plantbuild show ./build.jsonnet
 ```
 
 ## How to overwrite default configurations of the provided templates
@@ -230,10 +221,6 @@ A list of functions inside the library:
 
 ###  Docker Compose functions
 
-- dc.go_test
-- dc.go_apps_test
-- dc.node_apps_test
-- dc.go_build_dep_image
 - dc.build_image
 - dc.build_apps_image
 
