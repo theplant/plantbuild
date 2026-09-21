@@ -26,7 +26,7 @@ local v = std.extVar('VERSION');
   ingressClassName: 'nginx',
   pathType: 'ImplementationSpecific',
   jobTTL: 1800,
-  cronjobTTL: 3600,
+  cronjobTTL: 86400,
 
   // config helper func
   local root = self,
