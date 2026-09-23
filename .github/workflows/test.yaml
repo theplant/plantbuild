@@ -1,0 +1,29 @@
+name: Test
+
+# Replaces the Prow jobs pull-plantbuild-test and post-plantbuild-test.
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+env:
+  # Keep this version the same as JSONNET_VERSION in the Dockerfile, so
+  # that the tests use the jsonnet of the image.
+  JSONNET_VERSION: 0.22.0
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - run: |
+          curl -fsSL "https://github.com/google/go-jsonnet/releases/download/v${JSONNET_VERSION}/go-jsonnet_${JSONNET_VERSION}_linux_amd64.tar.gz" |
+            tar -xz -C "$RUNNER_TEMP" jsonnet
+          echo "$RUNNER_TEMP" >>"$GITHUB_PATH"
+
+      - run: ./test.sh
