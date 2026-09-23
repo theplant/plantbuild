@@ -1,20 +1,20 @@
-ARG GO_VERSION=1.24
-ARG JSONNET_VERSION=v0.18.0
+ARG JSONNET_VERSION=v0.22.0
 
-# ---- builder: compile jsonnet + jsonnetfmt ----
-FROM golang:${GO_VERSION}-alpine AS jsonnet-builder
-ARG JSONNET_VERSION
-RUN apk add --no-cache git
-RUN --mount=type=cache,target=/go/pkg/mod \
-    --mount=type=cache,target=/root/.cache/go-build \
-    go install github.com/google/go-jsonnet/cmd/jsonnet@${JSONNET_VERSION} && \
-    go install github.com/google/go-jsonnet/cmd/jsonnetfmt@${JSONNET_VERSION}
-
-# ---- runtime: Alpine ----
 FROM alpine:3.22
+ARG JSONNET_VERSION
+# Set by BuildKit to the architecture of the image, for example amd64.
+ARG TARGETARCH
 RUN apk add --no-cache ca-certificates
-COPY --from=jsonnet-builder /go/bin/jsonnet /usr/local/bin/jsonnet
-COPY --from=jsonnet-builder /go/bin/jsonnetfmt /usr/local/bin/jsonnetfmt
+# The go-jsonnet release binaries are statically linked, so they run on
+# Alpine. Download them in place of a compile with Go to build faster.
+RUN set -eu; \
+    url=https://github.com/google/go-jsonnet/releases/download/${JSONNET_VERSION}; \
+    file=go-jsonnet_${JSONNET_VERSION#v}_linux_${TARGETARCH}.tar.gz; \
+    cd /tmp; \
+    wget -q "$url/$file" "$url/checksums.txt"; \
+    grep "  $file\$" checksums.txt | sha256sum -c -; \
+    tar -xzof "$file" -C /usr/local/bin jsonnet jsonnetfmt; \
+    rm "$file" checksums.txt
 
 ENV JSONNET_PATH=/jsonnetlib
 ADD ./jsonnetlib /jsonnetlib
