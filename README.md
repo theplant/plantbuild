@@ -231,6 +231,8 @@ Checkout [Examples](https://github.com/theplant/plantbuild/tree/master/example) 
 
 ### Testing
 
+`test.sh` needs [`jsonnet`](https://github.com/google/go-jsonnet/releases) on `PATH`.
+
 ```
 bash test.sh
 bash test_with_kubectl.sh

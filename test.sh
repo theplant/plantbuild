@@ -1,27 +1,40 @@
 #!/bin/bash
 
-if which jsonnet; then
-    printf "Formatting code"
-    if find . -name '*.jsonnet' | xargs jsonnetfmt -i; then
-        echo ", Done"
-    fi
+# Run the test cases with jsonnet against ./jsonnetlib, with the same
+# arguments that entry.sh gives in the plantbuild image. Put jsonnet on
+# PATH first.
+
+if ! command -v jsonnet >/dev/null; then
+    echo "jsonnet not found, install it from https://github.com/google/go-jsonnet/releases"
+    exit 1
 fi
+
+githash7=$(git rev-parse HEAD | cut -c 1-7)
+
+# show <jsonnet file> [-v <version>], the same as `plantbuild show`
+show() {
+    local file=$1 version=$githash7 opt OPTIND=1
+    shift
+    while getopts "v:" opt; do
+        case $opt in
+        v) version=$OPTARG ;;
+        *) return 1 ;;
+        esac
+    done
+    jsonnet -J jsonnetlib -V VERSION="$version" "$file"
+}
 
 fail() {
     echo "FAILED:" $1
     exit 1
 }
 
-## Build
-echo "Building"
-./plantbuild build ./build.jsonnet
-
 ## Tests
 for c in $(cat ./test_cases.json | jq -r '.[] | @base64'); do
     show_args=$(echo $c | base64 --decode | jq -r '.show_args')
     printf "\n\n"
-    echo "Testing ./plantbuild show $show_args"
-    result=$(./plantbuild show $show_args)
+    echo "Testing show $show_args"
+    result=$(show $show_args)
     for assert in $(echo $c | base64 --decode | jq -r '.asserts[] | @base64'); do
         jq_path=$(echo $assert | base64 --decode | jq -r '.jq_path')
         expected=$(echo $assert | base64 --decode | jq -r '.expected')
@@ -35,7 +48,7 @@ for c in $(cat ./test_cases.json | jq -r '.[] | @base64'); do
             printf "\n==expected==\n$expected\n"
             printf "\n==actual==\n$actual\n"
             diff -B <(printf "$actual\n") <(printf "$expected\n")
-            fail "./plantbuild show $show_args"
+            fail "show $show_args"
         fi
     done
 done
