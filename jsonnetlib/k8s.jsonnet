@@ -338,6 +338,7 @@ cfg {
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
     maxSurge=root.maxSurge,
+    strategy=root.strategy,
     ingressAnnotations={},
     envmap={},
     env=[],
@@ -372,6 +373,7 @@ cfg {
           memoryLimit=memoryLimit,
           cpuLimit=cpuLimit,
           maxSurge=maxSurge,
+          strategy=strategy,
           envmap=envmap,
           env=env,
           container=container,
@@ -501,6 +503,7 @@ cfg {
     memoryLimit=root.memoryLimit,
     cpuLimit=root.cpuLimit,
     maxSurge=root.maxSurge,
+    strategy=root.strategy,
     container={},
     volumes=[],
     terminationGracePeriodSeconds=root.terminationGracePeriodSeconds,
@@ -572,7 +575,7 @@ cfg {
     },
     spec: {
       [if replicas != null then 'replicas']: replicas,
-      strategy: {
+      strategy: if std.length(strategy) > 0 then strategy else {
         rollingUpdate: {
           maxSurge: maxSurge,
           maxUnavailable: 0,

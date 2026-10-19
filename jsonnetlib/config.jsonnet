@@ -16,6 +16,7 @@ local v = std.extVar('VERSION');
   memoryLimit: '100Mi',
   cpuLimit: '50m',
   maxSurge: 1,
+  strategy: {},
   replicas: 1,
   minAvailable: 1,
   failedJobsHistoryLimit: 1,

@@ -36,6 +36,7 @@ local k = import 'k.libsonnet';
     requests={ cpu: '20m', memory: '50Mi' },
     limits={ memory: '100Mi' },
     maxSurge=1,
+    strategy={},
     container={},
     terminationGracePeriodSeconds=30,
   )::
@@ -81,9 +82,10 @@ local k = import 'k.libsonnet';
     )
     + deployment.metadata.withNamespace(namespace)
     + deployment.metadata.withLabels(labels)
-    + deployment.spec.strategy.withType('RollingUpdate')
-    + deployment.spec.strategy.rollingUpdate.withMaxSurge(maxSurge)
-    + deployment.spec.strategy.rollingUpdate.withMaxUnavailable(0)
+    + (if std.length(strategy) > 0 then { spec+: { strategy: strategy } }
+       else deployment.spec.strategy.withType('RollingUpdate')
+            + deployment.spec.strategy.rollingUpdate.withMaxSurge(maxSurge)
+            + deployment.spec.strategy.rollingUpdate.withMaxUnavailable(0))
     + (if std.length(std.toString(terminationGracePeriodSeconds)) > 0 then deployment.spec.template.spec.withTerminationGracePeriodSeconds(terminationGracePeriodSeconds) else {})
     + {
       spec+: {
@@ -219,6 +221,7 @@ local k = import 'k.libsonnet';
     requests={ cpu: '20m', memory: '50Mi' },
     limits={ memory: '100Mi' },
     maxSurge=1,
+    strategy={},
     terminationGracePeriodSeconds=30,
     ingressTLSEnabled=false,
     minReplicas=null,
@@ -248,6 +251,7 @@ local k = import 'k.libsonnet';
                 requests=requests,
                 limits=limits,
                 maxSurge=maxSurge,
+                strategy=strategy,
                 terminationGracePeriodSeconds=terminationGracePeriodSeconds,
                 container=container,
               )
